@@ -1,0 +1,1 @@
+cppcheck --enable=warning,performance,portability --inline-suppr lib src
