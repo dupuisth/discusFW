@@ -20,7 +20,7 @@ Color Color::operator*(ColorComponent s) const
 
 Color Color::operator/(ColorComponent s) const
 {
-  if (s)
+  if (s == 0.0)
   {
     return Black();
   }
@@ -55,6 +55,7 @@ void Color::operator/=(ColorComponent s)
     r = kMin;
     g = kMin;
     b = kMin;
+    return;
   }
 
   r /= s;

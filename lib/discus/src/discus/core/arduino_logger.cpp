@@ -12,7 +12,7 @@ LoggerLevel Logger::s_level = LoggerLevel::Info;
 
 void Logger::begin()
 {
-  Serial.begin(115000);
+  Serial.begin(115200);
   delay(300);
 }
 
@@ -113,5 +113,5 @@ void Logger::fatal(const char* fmt, ...)
   logv(LoggerLevel::Fatal, fmt, args);
   va_end(args);
 }
-#endif
 } // namespace discus::core
+#endif

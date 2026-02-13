@@ -6,7 +6,7 @@
 
 namespace discus::drivers::led_strip
 {
-/// @brief Led Strip drived using Adafruit NeoPixel
+/// @brief Led Strip driven using Adafruit NeoPixel
 class AdafruitNeoPixelLedStrip : public ILedStrip
 {
 public:
@@ -42,12 +42,10 @@ public:
   math::ColorComponent calculateOptimalBrightness() const;
 
 public:
-  static const uint32_t kDefaultMicroAmpDrawAtFullPerLed = 40u * 1000;           // Worst case exprimented
+  static const uint32_t kDefaultMicroAmpDrawAtFullPerLed = 40u * 1000;           // Worst case experimented
   static const uint32_t kDefaultMicroAmpDrawPassivePerLed = (60u * 1000u) / 150; // Experimented with 150 leds
 
 public:
-  Adafruit_NeoPixel m_handle;
-
   math::Color* m_pixels;
   uint16_t m_data_pin;
   uint16_t m_strip_size;
@@ -60,6 +58,8 @@ public:
   uint32_t m_micro_amp_draw_passive_per_led;
 
   bool m_dirty;
+
+  Adafruit_NeoPixel m_handle;
 };
 } // namespace discus::drivers::led_strip
 
