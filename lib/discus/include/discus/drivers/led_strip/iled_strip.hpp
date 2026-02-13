@@ -10,6 +10,8 @@ class ILedStrip
 public:
   virtual ~ILedStrip() = default;
 
+  /// @brief Initialize
+  virtual void begin() = 0;
   /// @brief Set all the pixels to black. This does not call show
   virtual void clear() = 0;
   /// @brief Update the led strip to show the current state

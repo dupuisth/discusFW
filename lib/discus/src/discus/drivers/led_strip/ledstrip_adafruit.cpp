@@ -21,12 +21,16 @@ drivers::led_strip::AdafruitNeoPixelLedStrip::AdafruitNeoPixelLedStrip(uint16_t 
     m_micro_amp_draw_at_full_per_led(kDefaultMicroAmpDrawAtFullPerLed),
     m_micro_amp_draw_passive_per_led(kDefaultMicroAmpDrawPassivePerLed)
 {
-  m_handle.begin();
-  Logger::debug("[AdafruitNeoPixelLedStrip] Created (strip_size: %d, pin: %d)\n", strip_size, m_data_pin);
 }
 
 drivers::led_strip::AdafruitNeoPixelLedStrip::~AdafruitNeoPixelLedStrip()
 {
+}
+
+void drivers::led_strip::AdafruitNeoPixelLedStrip::begin()
+{
+  m_handle.begin();
+  Logger::debug("[AdafruitNeoPixelLedStrip] begin (strip_size: %d, pin: %d)\n", m_strip_size, m_data_pin);
 }
 
 void drivers::led_strip::AdafruitNeoPixelLedStrip::clear()
@@ -47,9 +51,10 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::show()
   {
     for (uint16_t i = 0; i < m_strip_size; i++)
     {
-      m_handle.setPixelColor(i, m_handle.Color(255, 0, 0));
+      m_handle.setPixelColor(i, packPixel(m_pixels[i]));
     }
     m_dirty = false;
+    m_handle.setBrightness(15);
     m_handle.show();
     Logger::debug("[AdafruitNeoPixelLedStrip] Show\n");
   }

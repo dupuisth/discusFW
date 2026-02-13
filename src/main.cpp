@@ -18,6 +18,8 @@ void setup()
   Logger::begin();
   Logger::setLevel(LoggerLevel::Debug);
   Logger::trace("Started Logger\n");
+
+  led_strip.begin();
 }
 
 void loop()
@@ -27,5 +29,6 @@ void loop()
   led_strip.clear();
   led_strip.setPixel(0, Color::Blue());
   led_strip.show();
+
   delay(1000);
 }

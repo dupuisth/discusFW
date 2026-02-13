@@ -10,8 +10,10 @@ namespace discus::drivers::led_strip
 class AdafruitNeoPixelLedStrip : public ILedStrip
 {
 public:
-  AdafruitNeoPixelLedStrip(uint16_t data_pin, uint16_t strip_size, math::Color* pixels_buffer, neoPixelType type = NEO_GRB | NEO_KHZ800);
+  AdafruitNeoPixelLedStrip(uint16_t data_pin, uint16_t strip_size, math::Color* pixels_buffer, neoPixelType type = NEO_GRB + NEO_KHZ800);
   ~AdafruitNeoPixelLedStrip();
+
+  void begin() override;
 
   void clear() override;
   void show() override;
@@ -43,7 +45,7 @@ public:
   static const uint32_t kDefaultMicroAmpDrawAtFullPerLed = 40u * 1000;           // Worst case exprimented
   static const uint32_t kDefaultMicroAmpDrawPassivePerLed = (60u * 1000u) / 150; // Experimented with 150 leds
 
-private:
+public:
   Adafruit_NeoPixel m_handle;
 
   math::Color* m_pixels;

@@ -12,7 +12,8 @@ LoggerLevel Logger::s_level = LoggerLevel::Info;
 
 void Logger::begin()
 {
-  Serial.begin(5000);
+  Serial.begin(115000);
+  delay(300);
 }
 
 void Logger::setLevel(LoggerLevel level)
