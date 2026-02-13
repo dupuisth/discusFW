@@ -1,13 +1,15 @@
+#include <discus/core/logger.hpp>
 #include <discus/drivers/led_strip/ledstrip_adafruit.hpp>
 #include <discus/math/common.hpp>
 
 using namespace discus;
+using namespace discus::core::logger;
 
 // Use kMax for m_currentBrightness and kMin for m_targetBrightness => force a set on the strip
 drivers::led_strip::AdafruitNeoPixelLedStrip::AdafruitNeoPixelLedStrip(uint16_t data_pin,
     uint16_t strip_size,
     math::Color* pixels_buffer,
-    neoPixelType type = NEO_GRB | NEO_KHZ800) :
+    neoPixelType type) :
     m_data_pin(data_pin),
     m_strip_size(strip_size),
     m_pixels(pixels_buffer),
@@ -20,6 +22,7 @@ drivers::led_strip::AdafruitNeoPixelLedStrip::AdafruitNeoPixelLedStrip(uint16_t 
     m_micro_amp_draw_passive_per_led(kDefaultMicroAmpDrawPassivePerLed)
 {
   m_handle.begin();
+  Logger::debug("[AdafruitNeoPixelLedStrip] Created (strip_size: %d, pin: %d)\n", strip_size, m_data_pin);
 }
 
 drivers::led_strip::AdafruitNeoPixelLedStrip::~AdafruitNeoPixelLedStrip()
@@ -34,6 +37,8 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::clear()
     m_pixels[i] = math::Color::Black();
   }
   m_dirty = true;
+
+  Logger::debug("[AdafruitNeoPixelLedStrip] Cleared\n");
 }
 
 void drivers::led_strip::AdafruitNeoPixelLedStrip::show()
@@ -42,17 +47,19 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::show()
   {
     for (uint16_t i = 0; i < m_strip_size; i++)
     {
-      m_handle.setPixelColor(i, packPixel(m_pixels[i]));
+      m_handle.setPixelColor(i, m_handle.Color(255, 0, 0));
     }
     m_dirty = false;
+    m_handle.show();
+    Logger::debug("[AdafruitNeoPixelLedStrip] Show\n");
   }
-  m_handle.show();
 }
 
 void drivers::led_strip::AdafruitNeoPixelLedStrip::setPixel(uint16_t index, const math::Color& color)
 {
   m_pixels[index] = color.clamped();
   m_dirty = true;
+  Logger::debug("[AdafruitNeoPixelLedStrip] setPixel(%u, {%.2f, %.2f, %.2f})\n", index, color.r, color.g, color.b);
 }
 
 math::Color drivers::led_strip::AdafruitNeoPixelLedStrip::getPixel(uint16_t index) const
@@ -74,6 +81,7 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::setBrightness(math::ColorComp
 {
   m_target_brightness = math::clamp(brightness, math::Color::kMin, math::Color::kMax);
   m_dirty = true;
+  Logger::debug("[AdafruitNeoPixelLedStrip] setBrightness %f\n", brightness);
 }
 
 math::ColorComponent drivers::led_strip::AdafruitNeoPixelLedStrip::getBrightness() const
@@ -89,6 +97,7 @@ uint16_t drivers::led_strip::AdafruitNeoPixelLedStrip::getSize() const
 void drivers::led_strip::AdafruitNeoPixelLedStrip::setPowerBudgetMilliAmp(uint32_t limit_milli_amp)
 {
   m_limit_milli_amp = limit_milli_amp;
+  Logger::debug("[AdafruitNeoPixelLedStrip] setPowerBudgetMilliAmp %u\n", limit_milli_amp);
 }
 
 uint32_t drivers::led_strip::AdafruitNeoPixelLedStrip::getPowerBudgetMilliAmp() const

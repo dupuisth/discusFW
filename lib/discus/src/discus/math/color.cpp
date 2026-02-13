@@ -27,35 +27,34 @@ Color Color::operator/(ColorComponent s) const
   return {r / s, g / s, b / s};
 }
 
-Color& Color::operator+=(const Color& o)
+void Color::operator+=(const Color& o)
 {
   r += o.r;
   g += o.g;
   b += o.b;
 }
 
-Color& Color::operator-=(const Color& o)
+void Color::operator-=(const Color& o)
 {
   r -= o.r;
   g -= o.g;
   b -= o.b;
 }
 
-Color& Color::operator*=(ColorComponent s)
+void Color::operator*=(ColorComponent s)
 {
   r *= s;
   g *= s;
   b *= s;
 }
 
-Color& Color::operator/=(ColorComponent s)
+void Color::operator/=(ColorComponent s)
 {
   if (s == 0.0)
   {
     r = kMin;
     g = kMin;
     b = kMin;
-    return;
   }
 
   r /= s;
