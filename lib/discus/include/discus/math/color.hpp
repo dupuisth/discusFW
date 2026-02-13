@@ -38,7 +38,7 @@ struct Color
 
   /// @brief Clamp the color components between the expected range [kMin, kMax]
   /// @return The color clamped
-  Color clamp() const;
+  Color clamped() const;
 
   /// @brief Clamp the color components between the expected range [kMin, kMax] (in place)
   void clampInPlace();

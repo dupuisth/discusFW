@@ -68,7 +68,7 @@ bool Color::isValid() const
   return r >= kMin && r <= kMax && g >= kMin && g <= kMax && b >= kMin && b <= kMax;
 }
 
-Color Color::clamp() const
+Color Color::clamped() const
 {
   return {math::clamp(r, kMin, kMax), math::clamp(g, kMin, kMax), math::clamp(b, kMin, kMax)};
 }
