@@ -10,16 +10,16 @@ drivers::led_strip::AdafruitNeoPixelLedStrip::AdafruitNeoPixelLedStrip(uint16_t 
     uint16_t strip_size,
     math::Color* pixels_buffer,
     neoPixelType type) :
+    m_pixels(pixels_buffer),
     m_data_pin(data_pin),
     m_strip_size(strip_size),
-    m_pixels(pixels_buffer),
-    m_handle(strip_size, data_pin, type),
-    m_dirty(true),
-    m_limit_milli_amp(0),
-    m_current_brightness(-1.0),
     m_target_brightness(math::Color::kMin),
+    m_current_brightness(-1.0),
+    m_limit_milli_amp(0),
     m_micro_amp_draw_at_full_per_led(kDefaultMicroAmpDrawAtFullPerLed),
-    m_micro_amp_draw_passive_per_led(kDefaultMicroAmpDrawPassivePerLed)
+    m_micro_amp_draw_passive_per_led(kDefaultMicroAmpDrawPassivePerLed),
+    m_dirty(true),
+    m_handle(strip_size, data_pin, type)
 {
   Logger::info("[AdafruitNeoPixelLedStrip] created (strip_size: %d, pin: %d)\n", m_strip_size, m_data_pin);
 }
@@ -82,7 +82,7 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::show()
 
 void drivers::led_strip::AdafruitNeoPixelLedStrip::setPixel(uint16_t index, const math::Color& color)
 {
-  if (index > m_strip_size)
+  if (index >= m_strip_size)
   {
     Logger::warn("[AdafruitNeoPixelLedStrip] setPixel, index is too high (index: %d, strip_size: %d)\n", index, m_strip_size);
   }
@@ -95,7 +95,7 @@ void drivers::led_strip::AdafruitNeoPixelLedStrip::setPixel(uint16_t index, cons
 
 math::Color drivers::led_strip::AdafruitNeoPixelLedStrip::getPixel(uint16_t index) const
 {
-  if (index > m_strip_size)
+  if (index >= m_strip_size)
   {
     Logger::warn("[AdafruitNeoPixelLedStrip] getPixel, index is too high (index: %d, strip_size: %d)\n", index, m_strip_size);
   }
