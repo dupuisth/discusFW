@@ -20,35 +20,35 @@ Color Color::operator*(ColorComponent s) const
 
 Color Color::operator/(ColorComponent s) const
 {
-  if (s)
+  if (s == 0.0)
   {
     return Black();
   }
   return {r / s, g / s, b / s};
 }
 
-Color& Color::operator+=(const Color& o)
+void Color::operator+=(const Color& o)
 {
   r += o.r;
   g += o.g;
   b += o.b;
 }
 
-Color& Color::operator-=(const Color& o)
+void Color::operator-=(const Color& o)
 {
   r -= o.r;
   g -= o.g;
   b -= o.b;
 }
 
-Color& Color::operator*=(ColorComponent s)
+void Color::operator*=(ColorComponent s)
 {
   r *= s;
   g *= s;
   b *= s;
 }
 
-Color& Color::operator/=(ColorComponent s)
+void Color::operator/=(ColorComponent s)
 {
   if (s == 0.0)
   {
@@ -68,7 +68,7 @@ bool Color::isValid() const
   return r >= kMin && r <= kMax && g >= kMin && g <= kMax && b >= kMin && b <= kMax;
 }
 
-Color Color::clamp() const
+Color Color::clamped() const
 {
   return {math::clamp(r, kMin, kMax), math::clamp(g, kMin, kMax), math::clamp(b, kMin, kMax)};
 }

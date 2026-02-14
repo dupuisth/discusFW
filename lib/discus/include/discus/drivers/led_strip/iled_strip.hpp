@@ -10,6 +10,8 @@ class ILedStrip
 public:
   virtual ~ILedStrip() = default;
 
+  /// @brief Initialize
+  virtual void begin() = 0;
   /// @brief Set all the pixels to black. This does not call show
   virtual void clear() = 0;
   /// @brief Update the led strip to show the current state
@@ -35,9 +37,13 @@ public:
   /// @brief Return the number of leds in the led strip
   virtual uint16_t getSize() const = 0;
 
-  /// @brief Set the limit in mA that the led strip should not exceed
-  virtual void setPowerBudgetMilliAmp(uint32_t limitMilliAmp) = 0;
+  /// @brief Set the limit in mA that the led strip should not exceed (use 0 to set no limit)
+  virtual void setPowerBudgetMilliAmp(uint32_t limit_milli_amp) = 0;
   /// @brief Get the limit in mA that the led strip should not exceed
   virtual uint32_t getPowerBudgetMilliAmp() const = 0;
+
+  /// @brief Set the dirty bit, indicate that the pixels have changed (call it if you use
+  /// getPixels() and modify an item)
+  virtual void setDirty() = 0;
 };
 } // namespace discus::drivers::led_strip

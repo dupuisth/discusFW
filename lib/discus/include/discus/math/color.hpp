@@ -27,10 +27,10 @@ struct Color
   Color operator-(const Color& o) const;
   Color operator*(ColorComponent o) const;
   Color operator/(ColorComponent o) const;
-  Color& operator+=(const Color& o);
-  Color& operator-=(const Color& o);
-  Color& operator*=(ColorComponent s);
-  Color& operator/=(ColorComponent s);
+  void operator+=(const Color& o);
+  void operator-=(const Color& o);
+  void operator*=(ColorComponent s);
+  void operator/=(ColorComponent s);
 
   /// @brief Return true if the color components are between the expected range [kMin, kMax]
   /// @return True if between the range
@@ -38,7 +38,7 @@ struct Color
 
   /// @brief Clamp the color components between the expected range [kMin, kMax]
   /// @return The color clamped
-  Color clamp() const;
+  Color clamped() const;
 
   /// @brief Clamp the color components between the expected range [kMin, kMax] (in place)
   void clampInPlace();
