@@ -180,8 +180,8 @@ void LedService::propagateFromCenter(const math::Color& color)
   }
   else
   {
-    int lowerMiddle = size / 2;
-    int upperMiddle = lowerMiddle + 1;
+    int lowerMiddle = size / 2 - 1;
+    int upperMiddle = size / 2;
     for (int i = 0; i < lowerMiddle; i++)
     {
       pixels[i] = pixels[i + 1];
