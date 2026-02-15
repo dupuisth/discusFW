@@ -93,7 +93,6 @@ void LedService::blur(math::ColorComponent ratio, bool loop)
     }
 
     calculated[i] += pixels[i] * (1 - ratio);
-    calculated[i] = calculated[i];
   }
 
   for (uint16_t i = 0; i < size; i++)
