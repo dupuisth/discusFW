@@ -19,6 +19,8 @@ Color pixels[LEDSTRIP_SIZE];
 AdafruitNeoPixelLedStrip led_strip(LEDSTRIP_DATA, LEDSTRIP_SIZE, pixels);
 LedService led_service(&led_strip);
 
+Color colors[] = {Color::Blue(), Color::Green(), Color::Teal(), Color::Purple(), Color::Red()};
+
 void setup()
 {
   Logger::begin();
@@ -34,36 +36,18 @@ void setup()
 
 void loop()
 {
-  for (int i = 0; i < 115; i++)
+  for (int i = 0; i < 1000; i++)
   {
-    if (i % 6 == 0)
-    {
-      led_service.propagateFromCenter(Color::Teal());
-    }
-    else if (i % 6 == 1)
-    {
-      led_service.propagateFromCenter(Color::Purple());
-    }
-    else if (i % 6 == 2)
-    {
-      led_service.propagateFromCenter(Color::Red());
-    }
-    else if (i % 6 == 3)
-    {
-      led_service.propagateFromCenter(Color::Green());
-    }
-    else if (i % 6 == 4)
-    {
-      led_service.propagateFromCenter(Color::Red());
-    }
-    else if (i % 6 == 5)
-    {
-      led_service.propagateFromCenter(Color::Green());
-    }
+    // 5 pixels of the same color (maybe sometimes will not be 5 because we cut off at 1000 iterations but it's ok)
+    // Should maybe keep i as a global and remove the for loop, but this code will disapear soon
+    Color color = colors[(i / 5) % (sizeof(colors) / sizeof(Color))];
+    led_service.propagateFromCenter(color);
+    // led_service.shiftForward();
+    // led_service.setPixel(0, color);
 
     led_service.show();
-    led_service.blur(0.1, true);
-    led_service.dim(0.05);
-    delay(50);
+    // led_service.blur(0.2, true);
+    // led_service.dim(0.02);
+    delay(1000 / 1);
   }
 }

@@ -144,7 +144,7 @@ void LedService::propagateFromCenter(const math::Color& color)
 
   if (size % 2 == 1)
   {
-    int middle = (size + 1) / 2;
+    int middle = size / 2;
     for (int i = 0; i < middle; i++)
     {
       pixels[i] = pixels[i + 1];
