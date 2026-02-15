@@ -21,6 +21,9 @@ public:
   /// @brief Set the pixel
   void setPixel(uint16_t index, const math::Color& color);
 
+  /// @brief Set all the pixels to the given color
+  void fill(const math::Color& color);
+
   /// @brief Add the color to the given pixel
   void addPixel(uint16_t index, const math::Color& color);
 

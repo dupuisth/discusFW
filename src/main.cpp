@@ -38,16 +38,15 @@ void loop()
 {
   for (int i = 0; i < 1000; i++)
   {
-    // 5 pixels of the same color (maybe sometimes will not be 5 because we cut off at 1000 iterations but it's ok)
-    // Should maybe keep i as a global and remove the for loop, but this code will disapear soon
-    Color color = colors[(i / 5) % (sizeof(colors) / sizeof(Color))];
+    // 15 pixels of the same color (maybe sometimes will not be 15 because we cut off at 1000 iterations but it's ok)
+    // Should keep i as a global and remove the for loop, but this code is just for testing so nvm
+    Color color = colors[(i / 15) % (sizeof(colors) / sizeof(Color))];
     led_service.propagateFromCenter(color);
-    // led_service.shiftForward();
-    // led_service.setPixel(0, color);
 
     led_service.show();
-    // led_service.blur(0.2, true);
-    // led_service.dim(0.02);
-    delay(1000 / 1);
+    led_service.blur(0.2, true);
+    led_service.dim(0.02);
+
+    delay(1000 / 24);
   }
 }

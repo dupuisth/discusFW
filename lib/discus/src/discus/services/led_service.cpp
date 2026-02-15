@@ -30,6 +30,18 @@ void LedService::setPixel(uint16_t index, const discus::math::Color& color)
   m_driver->setPixel(index, color);
 }
 
+void LedService::fill(const math::Color& color)
+{
+  const uint16_t size = m_driver->getSize();
+  math::Color* pixels = m_driver->getPixels();
+  const math::Color clamped = color.clamped();
+  for (uint16_t i = 0; i < size; i++)
+  {
+    pixels[i] = clamped;
+  }
+  m_driver->setDirty();
+}
+
 void LedService::addPixel(uint16_t index, const discus::math::Color& color)
 {
   discus::math::Color final_color = m_driver->getPixel(index);
@@ -65,34 +77,45 @@ void LedService::dimLinear(math::ColorComponent ratio)
 
 void LedService::blur(math::ColorComponent ratio, bool loop)
 {
-  uint16_t size = m_driver->getSize();
-
+  const uint16_t size = m_driver->getSize();
   math::Color* pixels = m_driver->getPixels();
   math::Color calculated[size];
 
-  math::ColorComponent ratio_compo = ratio * 0.5;
+  // Neighbor weight
+  const math::ColorComponent wN = ratio * 0.5;
+
   for (uint16_t i = 0; i < size; i++)
   {
     calculated[i] = math::Color::Black();
+
+    math::ColorComponent used_neighbor_weight = 0;
+
+    // backward neighbor
     if (i > 0)
     {
-      calculated[i] += pixels[i - 1] * ratio_compo;
+      calculated[i] += pixels[i - 1] * wN;
+      used_neighbor_weight += wN;
     }
-    else if (loop)
+    else if (loop && size > 1)
     {
-      calculated[i] += pixels[size - 1] * ratio_compo;
+      calculated[i] += pixels[size - 1] * wN;
+      used_neighbor_weight += wN;
     }
 
-    if (i < size - 1)
+    // forward neighbor
+    if (i + 1 < size)
     {
-      calculated[i] += pixels[i + 1] * ratio_compo;
+      calculated[i] += pixels[i + 1] * wN;
+      used_neighbor_weight += wN;
     }
-    else if (loop)
+    else if (loop && size > 1)
     {
-      calculated[i] += pixels[0] * ratio_compo;
+      calculated[i] += pixels[0] * wN;
+      used_neighbor_weight += wN;
     }
 
-    calculated[i] += pixels[i] * (1 - ratio);
+    const math::ColorComponent wC = (math::ColorComponent)(1 - used_neighbor_weight);
+    calculated[i] += pixels[i] * wC;
   }
 
   for (uint16_t i = 0; i < size; i++)
@@ -104,7 +127,7 @@ void LedService::blur(math::ColorComponent ratio, bool loop)
 
 void LedService::shiftForward(bool loop)
 {
-  uint16_t size = m_driver->getSize();
+  const uint16_t size = m_driver->getSize();
   math::Color* pixels = m_driver->getPixels();
 
   math::Color buffer = pixels[size - 1];
@@ -121,7 +144,7 @@ void LedService::shiftForward(bool loop)
 
 void LedService::shiftBackward(bool loop)
 {
-  uint16_t size = m_driver->getSize();
+  const uint16_t size = m_driver->getSize();
   math::Color* pixels = m_driver->getPixels();
 
   math::Color buffer = pixels[0];
@@ -138,7 +161,7 @@ void LedService::shiftBackward(bool loop)
 
 void LedService::propagateFromCenter(const math::Color& color)
 {
-  uint16_t size = m_driver->getSize();
+  const uint16_t size = m_driver->getSize();
   math::Color* pixels = m_driver->getPixels();
 
   if (size % 2 == 1)
