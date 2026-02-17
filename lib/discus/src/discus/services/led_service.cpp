@@ -1,5 +1,6 @@
 #include <discus/services/led_service.hpp>
 
+using namespace discus;
 using namespace discus::services;
 
 LedService::LedService(drivers::led_strip::ILedStrip* led_strip) : m_driver(led_strip)
@@ -20,12 +21,12 @@ void LedService::clear()
   m_driver->clear();
 }
 
-discus::math::Color LedService::getPixel(uint16_t index)
+math::Color LedService::getPixel(uint16_t index)
 {
   return m_driver->getPixel(index);
 }
 
-void LedService::setPixel(uint16_t index, const discus::math::Color& color)
+void LedService::setPixel(uint16_t index, const math::Color& color)
 {
   m_driver->setPixel(index, color);
 }
@@ -42,9 +43,9 @@ void LedService::fill(const math::Color& color)
   m_driver->setDirty();
 }
 
-void LedService::addPixel(uint16_t index, const discus::math::Color& color)
+void LedService::addPixel(uint16_t index, const math::Color& color)
 {
-  discus::math::Color final_color = m_driver->getPixel(index);
+  math::Color final_color = m_driver->getPixel(index);
   final_color += color;
   m_driver->setPixel(index, final_color);
 }
@@ -61,6 +62,7 @@ void LedService::dim(math::ColorComponent ratio)
   for (uint16_t i = 0; i < m_driver->getSize(); i++)
   {
     pixels[i] *= ratio;
+    pixels[i].clampInPlace();
   }
   m_driver->setDirty();
 }
@@ -198,7 +200,7 @@ void LedService::propagateFromCenter(const math::Color& color)
   m_driver->setDirty();
 }
 
-discus::drivers::led_strip::ILedStrip* LedService::getDriver()
+drivers::led_strip::ILedStrip* LedService::getDriver()
 {
   return m_driver;
 }
