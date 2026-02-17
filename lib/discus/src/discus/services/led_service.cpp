@@ -1,3 +1,4 @@
+#include <cassert>
 #include <discus/core/logger.hpp>
 #include <discus/math/common.hpp>
 #include <discus/services/led_service.hpp>
@@ -9,7 +10,8 @@ LedService::LedService(drivers::led_strip::ILedStrip* led_strip) : m_driver(led_
 {
   if (m_driver == nullptr)
   {
-    core::logger::Logger::error("[LedService] m_driver is null, this will lead to errors when calling a function");
+    core::logger::Logger::error("[LedService] m_driver is null");
+    assert(m_driver != nullptr);
   }
 }
 
