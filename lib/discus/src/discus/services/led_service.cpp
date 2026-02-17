@@ -130,6 +130,10 @@ void LedService::blur(math::ColorComponent ratio, bool loop)
 void LedService::shiftForward(bool loop)
 {
   const uint16_t size = m_driver->getSize();
+  if (size < 2)
+  {
+    return;
+  }
   math::Color* pixels = m_driver->getPixels();
 
   math::Color buffer = pixels[size - 1];
@@ -147,6 +151,10 @@ void LedService::shiftForward(bool loop)
 void LedService::shiftBackward(bool loop)
 {
   const uint16_t size = m_driver->getSize();
+  if (size < 2)
+  {
+    return;
+  }
   math::Color* pixels = m_driver->getPixels();
 
   math::Color buffer = pixels[0];
