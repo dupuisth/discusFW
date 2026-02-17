@@ -20,7 +20,7 @@ Color Color::operator*(ColorComponent s) const
 
 Color Color::operator/(ColorComponent s) const
 {
-  if (s == 0.0)
+  if (s == ColorComponent{0})
   {
     return Black();
   }
@@ -50,7 +50,7 @@ void Color::operator*=(ColorComponent s)
 
 void Color::operator/=(ColorComponent s)
 {
-  if (s == 0.0)
+  if (s == ColorComponent{0})
   {
     r = kMin;
     g = kMin;
@@ -78,4 +78,10 @@ void Color::clampInPlace()
   r = math::clamp(r, kMin, kMax);
   g = math::clamp(g, kMin, kMax);
   b = math::clamp(b, kMin, kMax);
+}
+
+Color Color::lerp(const Color& a, const Color& b, ColorComponent lerp_value)
+{
+  lerp_value = math::clamp(lerp_value, 0.0, 1.0);
+  return Color(math::lerp(a.r, b.r, lerp_value), math::lerp(a.g, b.g, lerp_value), math::lerp(a.b, b.b, lerp_value));
 }
