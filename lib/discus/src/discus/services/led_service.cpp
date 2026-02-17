@@ -1,3 +1,5 @@
+#include <discus/core/logger.hpp>
+#include <discus/math/common.hpp>
 #include <discus/services/led_service.hpp>
 
 using namespace discus;
@@ -5,6 +7,10 @@ using namespace discus::services;
 
 LedService::LedService(drivers::led_strip::ILedStrip* led_strip) : m_driver(led_strip)
 {
+  if (m_driver == nullptr)
+  {
+    core::logger::Logger::error("[LedService] m_driver is null, this will lead to errors when calling a function");
+  }
 }
 
 LedService::~LedService()
@@ -52,13 +58,14 @@ void LedService::addPixel(uint16_t index, const math::Color& color)
 
 void LedService::mixPixel(uint16_t index, const math::Color& color, math::ColorComponent mix)
 {
+  mix = math::clamp(mix, 0.0, 1.0);
   m_driver->setPixel(index, math::Color::lerp(m_driver->getPixel(index), color, mix));
 }
 
 void LedService::dim(math::ColorComponent ratio)
 {
   math::Color* pixels = m_driver->getPixels();
-  ratio = 1.0 - ratio;
+  ratio = math::clamp(1.0 - ratio, 0.0, 1.0);
   for (uint16_t i = 0; i < m_driver->getSize(); i++)
   {
     pixels[i] *= ratio;
@@ -69,6 +76,7 @@ void LedService::dim(math::ColorComponent ratio)
 
 void LedService::dimLinear(math::ColorComponent ratio)
 {
+  ratio = math::clamp(ratio, 0.0, 1.0);
   math::Color* pixels = m_driver->getPixels();
   for (uint16_t i = 0; i < m_driver->getSize(); i++)
   {
@@ -83,6 +91,7 @@ void LedService::blur(math::ColorComponent ratio, bool loop)
   math::Color* pixels = m_driver->getPixels();
   math::Color calculated[size];
 
+  ratio = math::clamp(ratio, 0.0, 1.0);
   // Neighbor weight
   const math::ColorComponent wN = ratio * 0.5;
 
@@ -172,6 +181,10 @@ void LedService::shiftBackward(bool loop)
 void LedService::propagateFromCenter(const math::Color& color)
 {
   const uint16_t size = m_driver->getSize();
+  if (size == 0)
+  {
+    return;
+  }
   math::Color* pixels = m_driver->getPixels();
 
   if (size % 2 == 1)
