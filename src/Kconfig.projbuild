@@ -1,0 +1,98 @@
+menu "Example Configuration"
+
+    #
+    # Basic WiFi credentials
+    #
+    config ESP_WIFI_SSID
+        string "WiFi SSID"
+        default "mywifissid"
+        help
+            SSID (network name) of the target WiFi Access Point.
+
+    config ESP_WIFI_PASSWORD
+        string "WiFi Password"
+        default "mypassword"
+        help
+            Password for the target WiFi Access Point.
+
+    config ESP_MAXIMUM_RETRY
+        int "Maximum WiFi connect retries"
+        default 5
+        range 0 100
+        help
+            Number of connection retries before giving up.
+
+    #
+    # Authmode threshold (maps to .threshold.authmode)
+    # Exactly one must be selected for your code as written.
+    #
+    choice ESP_WIFI_AUTH_THRESHOLD
+        prompt "WiFi authmode threshold"
+        default ESP_WIFI_AUTH_WPA2_PSK
+        help
+            Minimum acceptable authentication mode when scanning/connecting.
+            Choose the weakest authmode you are willing to connect to.
+
+        config ESP_WIFI_AUTH_OPEN
+            bool "OPEN (no security)"
+
+        config ESP_WIFI_AUTH_WEP
+            bool "WEP"
+
+        config ESP_WIFI_AUTH_WPA_PSK
+            bool "WPA-PSK"
+
+        config ESP_WIFI_AUTH_WPA2_PSK
+            bool "WPA2-PSK"
+
+        config ESP_WIFI_AUTH_WPA_WPA2_PSK
+            bool "WPA/WPA2-PSK"
+
+        config ESP_WIFI_AUTH_WPA3_PSK
+            bool "WPA3-PSK"
+
+        config ESP_WIFI_AUTH_WPA2_WPA3_PSK
+            bool "WPA2/WPA3-PSK"
+
+        config ESP_WIFI_AUTH_WAPI_PSK
+            bool "WAPI-PSK"
+    endchoice
+
+    #
+    # WPA3 SAE PWE (Password Element) mode selection (maps to .sae_pwe_h2e)
+    # Exactly one must be selected for your code as written.
+    #
+    choice ESP_STATION_EXAMPLE_WPA3_SAE_PWE_MODE
+        prompt "WPA3 SAE PWE mode"
+        default ESP_STATION_EXAMPLE_WPA3_SAE_PWE_HUNT_AND_PECK
+        help
+            Select WPA3 SAE PWE mode:
+              - Hunt and Peck
+              - Hash to Element
+              - Both
+
+        config ESP_STATION_EXAMPLE_WPA3_SAE_PWE_HUNT_AND_PECK
+            bool "Hunt and Peck"
+
+        config ESP_STATION_EXAMPLE_WPA3_SAE_PWE_HASH_TO_ELEMENT
+            bool "Hash to Element (H2E)"
+
+        config ESP_STATION_EXAMPLE_WPA3_SAE_PWE_BOTH
+            bool "Both (H&P + H2E)"
+    endchoice
+
+    #
+    # H2E Identifier (used when HASH_TO_ELEMENT or BOTH are selected)
+    #
+    config ESP_WIFI_PW_ID
+        string "WPA3 SAE H2E identifier (Password ID)"
+        default ""
+        depends on ESP_STATION_EXAMPLE_WPA3_SAE_PWE_HASH_TO_ELEMENT || ESP_STATION_EXAMPLE_WPA3_SAE_PWE_BOTH
+        help
+            Optional SAE H2E identifier (password identifier).
+            Leave empty unless your AP requires a specific identifier.
+
+    config BROKER_URI
+        string "MQTT Broker URI"
+        default "mqtt://localhost"
+endmenu
