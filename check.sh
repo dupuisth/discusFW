@@ -1,1 +1,0 @@
-cppcheck --enable=warning,performance,portability --inline-suppr ./lib/**/*.hpp ./lib/**/*.cpp ./src/**/*.hpp ./src/**/*.cpp
