@@ -249,7 +249,7 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
   // Prevent duplicate
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
-    if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers->callback == callback)
+    if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers[i]->callback == callback)
     {
       taskEXIT_CRITICAL(&s_handlers_lock);
       return ESP_ERR_INVALID_STATE;
