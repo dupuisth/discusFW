@@ -249,7 +249,7 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
   // Prevent duplicate
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
-    if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers[i]->callback == callback)
+    if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers[i].callback == callback)
     {
       taskEXIT_CRITICAL(&s_handlers_lock);
       return ESP_ERR_INVALID_STATE;
@@ -265,27 +265,26 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
       s_handlers[i].callback = callback;
       s_handlers[i].user_ctx = user_ctx;
       strcpy(s_handlers[i].topic, topic);
+      taskEXIT_CRITICAL(&s_handlers_lock);
 
       // Subsribe directly ?
-      taskENTER_CRITICAL(&s_state_lock);
-      bool subscribe_directly = s_connected;
-      taskEXIT_CRITICAL(&s_state_lock);
+      bool subscribe_directly = dc_mqtt_is_connected();
 
       if (subscribe_directly)
       {
         int msg_id = esp_mqtt_client_subscribe(mqtt_client, topic, 0);
         if (msg_id < 0)
         {
-          ESP_DRAM_LOGW(DRAM_STR(TAG), "Failed to subsribe to topic=%s (immediate)", topic);
+          ESP_LOGW(TAG, "Failed to subsribe to topic=%s (immediate)", topic);
         }
         else
         {
-          ESP_DRAM_LOGI(DRAM_STR(TAG), "Subscribe sent for topic=%s, msg_id=%d (immediate)", topic, msg_id);
+          ESP_LOGW(TAG, "Subscribe sent for topic=%s, msg_id=%d (immediate)", topic, msg_id);
         }
       }
       else
       {
-        ESP_DRAM_LOGI(DRAM_STR(TAG), "New subscription pending for topic=%s, callback=", topic);
+        ESP_LOGI(TAG, "New subscription pending for topic=%s", topic);
       }
 
       taskEXIT_CRITICAL(&s_handlers_lock);
@@ -294,7 +293,6 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
   }
 
   // Failed to insert, no slot left
-  taskEXIT_CRITICAL(&s_handlers_lock);
   return ESP_ERR_NO_MEM;
 }
 
