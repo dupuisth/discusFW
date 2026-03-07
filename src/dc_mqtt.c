@@ -287,7 +287,6 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
         ESP_LOGI(TAG, "New subscription pending for topic=%s", topic);
       }
 
-      taskEXIT_CRITICAL(&s_handlers_lock);
       return ESP_OK;
     }
   }
