@@ -1,7 +1,5 @@
 #include "dc_mqtt.h"
 
-esp_mqtt_client_handle_t mqtt_client = NULL;
-
 typedef struct
 {
   bool in_use;
@@ -10,63 +8,96 @@ typedef struct
   void* user_ctx;
 } dc_mqtt_topic_handler_entry_t;
 
+static esp_mqtt_client_handle_t s_mqtt_client = NULL;
 static dc_mqtt_topic_handler_entry_t s_handlers[DC_MQTT_MAX_TOPIC_HANDLERS] = {0};
-static portMUX_TYPE s_handlers_lock = portMUX_INITIALIZER_UNLOCKED;
-static bool s_connected = false;
-static portMUX_TYPE s_state_lock = portMUX_INITIALIZER_UNLOCKED;
 
+static SemaphoreHandle_t s_handlers_mutex = NULL;
+static SemaphoreHandle_t s_state_mutex = NULL;
+
+static bool s_connected = false;
 static TaskHandle_t s_heartbeat_task = NULL;
 
-static bool dc_mqtt_is_connected()
+bool dc_mqtt_is_connected(void)
 {
-  bool state;
-  taskENTER_CRITICAL(&s_state_lock);
-  state = s_connected;
-  taskEXIT_CRITICAL(&s_state_lock);
+  bool connected = false;
 
-  return state;
+  if (s_state_mutex == NULL)
+  {
+    return false;
+  }
+
+  if (xSemaphoreTake(s_state_mutex, portMAX_DELAY) == pdTRUE)
+  {
+    connected = s_connected;
+    xSemaphoreGive(s_state_mutex);
+  }
+
+  return connected;
+}
+
+static void dc_mqtt_set_connected(bool connected)
+{
+  if (s_state_mutex == NULL)
+  {
+    return;
+  }
+
+  if (xSemaphoreTake(s_state_mutex, portMAX_DELAY) == pdTRUE)
+  {
+    s_connected = connected;
+    xSemaphoreGive(s_state_mutex);
+  }
 }
 
 static esp_err_t dc_mqtt_send_heartbeat(void)
 {
-  char topic[128];
-  char payload[256];
+  char topic[DC_MQTT_HEARTBEAT_TOPIC_LEN];
+  char payload[DC_MQTT_HEARTBEAT_PAYLOAD_LEN];
 
   snprintf(topic, sizeof(topic), "device/%s/heartbeat", dc_device_id);
   snprintf(payload,
       sizeof(payload),
-      "{\"id\": \"%s\", \"uptime\": %" PRIu32 ", \"heap\": %" PRIu32 "}",
+      "{\"id\":\"%s\",\"uptime\":%" PRIu32 ",\"heap\":%" PRIu32 "}",
       dc_device_id,
       (uint32_t)(esp_log_timestamp() / 1000),
-      esp_get_free_heap_size());
+      (uint32_t)esp_get_free_heap_size());
 
-  return dc_mqtt_publish(topic, payload, strlen(payload), 0, 0, 0);
+  return dc_mqtt_publish(topic, payload, strlen(payload), 0, 0, false);
 }
 
 static void dc_mqtt_heartbeat_task(void* arg)
 {
-  while (1)
+  (void)arg;
+
+  while (true)
   {
     if (dc_mqtt_is_connected())
     {
-      dc_mqtt_send_heartbeat();
+      esp_err_t err = dc_mqtt_send_heartbeat();
+      if (err != ESP_OK)
+      {
+        ESP_LOGW(TAG, "Heartbeat publish failed: %s", esp_err_to_name(err));
+      }
     }
 
-    // 10s
-    vTaskDelay(pdMS_TO_TICKS(10000));
+    vTaskDelay(pdMS_TO_TICKS(CONFIG_DC_MQTT_HEARTBEAT_INTERVAL_MS));
   }
 }
 
 static void dc_mqtt_dispatch_message(const char* topic, const uint8_t* data, size_t data_len)
 {
-  dc_mqtt_topic_handler_entry_t handlers_copy[DC_MQTT_MAX_TOPIC_HANDLERS];
+  dc_mqtt_topic_handler_entry_t handlers_copy[DC_MQTT_MAX_TOPIC_HANDLERS] = {0};
 
-  // Copy all the handlers
-  // Other option: keep the lock while iterating and copy only when a match is found to call it
-  // But since there can be multiple calls on the same topics, this option might be better
-  taskENTER_CRITICAL(&s_handlers_lock);
-  memcpy(handlers_copy, s_handlers, sizeof(s_handlers));
-  taskEXIT_CRITICAL(&s_handlers_lock);
+  if (s_handlers_mutex == NULL)
+  {
+    return;
+  }
+
+  if (xSemaphoreTake(s_handlers_mutex, portMAX_DELAY) == pdTRUE)
+  {
+    memcpy(handlers_copy, s_handlers, sizeof(s_handlers));
+    xSemaphoreGive(s_handlers_mutex);
+  }
 
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
@@ -82,13 +113,20 @@ static void dc_mqtt_dispatch_message(const char* topic, const uint8_t* data, siz
   }
 }
 
-static void dc_resubsribe_all(void)
+static void dc_mqtt_resubscribe_all(void)
 {
-  dc_mqtt_topic_handler_entry_t handlers_copy[DC_MQTT_MAX_TOPIC_HANDLERS];
+  dc_mqtt_topic_handler_entry_t handlers_copy[DC_MQTT_MAX_TOPIC_HANDLERS] = {0};
 
-  taskENTER_CRITICAL(&s_handlers_lock);
-  memcpy(handlers_copy, s_handlers, sizeof(s_handlers));
-  taskEXIT_CRITICAL(&s_handlers_lock);
+  if (s_mqtt_client == NULL || s_handlers_mutex == NULL)
+  {
+    return;
+  }
+
+  if (xSemaphoreTake(s_handlers_mutex, portMAX_DELAY) == pdTRUE)
+  {
+    memcpy(handlers_copy, s_handlers, sizeof(s_handlers));
+    xSemaphoreGive(s_handlers_mutex);
+  }
 
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
@@ -97,10 +135,10 @@ static void dc_resubsribe_all(void)
       continue;
     }
 
-    int msg_id = esp_mqtt_client_subscribe(mqtt_client, handlers_copy[i].topic, 0);
+    int msg_id = esp_mqtt_client_subscribe(s_mqtt_client, handlers_copy[i].topic, 0);
     if (msg_id < 0)
     {
-      ESP_LOGW(TAG, "Failed to subsribe to topic=%s", handlers_copy[i].topic);
+      ESP_LOGW(TAG, "Failed to subscribe to topic=%s", handlers_copy[i].topic);
     }
     else
     {
@@ -109,122 +147,126 @@ static void dc_resubsribe_all(void)
   }
 }
 
-void dc_mqtt_event_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
+static void dc_mqtt_event_handler(void* handler_args, esp_event_base_t base, int32_t event_id, void* event_data)
 {
-  ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32, base, event_id);
-  esp_mqtt_event_handle_t event = event_data;
+  (void)handler_args;
+  (void)base;
+
+  esp_mqtt_event_handle_t event = (esp_mqtt_event_handle_t)event_data;
+
   switch ((esp_mqtt_event_id_t)event_id)
   {
   case MQTT_EVENT_CONNECTED:
-    ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-
-    taskENTER_CRITICAL(&s_state_lock);
-    s_connected = true;
-    taskEXIT_CRITICAL(&s_state_lock);
-
-    dc_resubsribe_all();
+    ESP_LOGI(TAG, "MQTT connected");
+    dc_mqtt_set_connected(true);
+    dc_mqtt_resubscribe_all();
     break;
 
   case MQTT_EVENT_DISCONNECTED:
-    ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-
-    taskENTER_CRITICAL(&s_state_lock);
-    s_connected = false;
-    taskEXIT_CRITICAL(&s_state_lock);
+    ESP_LOGW(TAG, "MQTT disconnected");
+    dc_mqtt_set_connected(false);
     break;
 
   case MQTT_EVENT_SUBSCRIBED:
-    if (event->data_len > 0 && event->data != NULL)
-    {
-      ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d, return code=0x%02x", event->msg_id, (uint8_t)*event->data);
-    }
-    else
-    {
-      ESP_LOGI(TAG, "MQTT_EVENT_SUBSCRIBED, msg_id=%d", event->msg_id);
-    }
+    ESP_LOGI(TAG, "MQTT subscribed, msg_id=%d", event->msg_id);
     break;
 
   case MQTT_EVENT_UNSUBSCRIBED:
-    ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
+    ESP_LOGI(TAG, "MQTT unsubscribed, msg_id=%d", event->msg_id);
     break;
 
   case MQTT_EVENT_PUBLISHED:
-    ESP_LOGI(TAG, "MQTT_EVENT_PUBLISHED, msg_id=%d", event->msg_id);
+    ESP_LOGI(TAG, "MQTT published, msg_id=%d", event->msg_id);
     break;
 
   case MQTT_EVENT_DATA:
-    ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-
-    char topic_buf[DC_MQTT_MAX_TOPIC_LEN];
-    // Truncate if the topic_len is too high
-    size_t copy_len = (event->topic_len < sizeof(topic_buf) - 1) ? event->topic_len : sizeof(topic_buf) - 1;
+  {
+    char topic_buf[DC_MQTT_MAX_TOPIC_LEN] = {0};
+    size_t copy_len = (event->topic_len < (int)(sizeof(topic_buf) - 1)) ? (size_t)event->topic_len : (sizeof(topic_buf) - 1);
 
     memcpy(topic_buf, event->topic, copy_len);
     topic_buf[copy_len] = '\0';
 
-    ESP_LOGI(TAG, "TOPIC=%.*s\r\n", event->topic_len, event->topic);
-    ESP_LOGI(TAG, "DATA=%.*s\r\n", event->data_len, event->data);
-
-    dc_mqtt_dispatch_message(topic_buf, (const uint8_t*)event->data, event->data_len);
+    dc_mqtt_dispatch_message(topic_buf, (const uint8_t*)event->data, (size_t)event->data_len);
     break;
+  }
+
   case MQTT_EVENT_ERROR:
-    ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
-    if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
+    ESP_LOGE(TAG, "MQTT error");
+    if (event->error_handle != NULL)
     {
-      ESP_LOGI(TAG, "Last error code reported from esp-tls: 0x%x", event->error_handle->esp_tls_last_esp_err);
-      ESP_LOGI(TAG, "Last tls stack error number: 0x%x", event->error_handle->esp_tls_stack_err);
-      ESP_LOGI(TAG,
-          "Last captured errno : %d (%s)",
-          event->error_handle->esp_transport_sock_errno,
-          strerror(event->error_handle->esp_transport_sock_errno));
-    }
-    else if (event->error_handle->error_type == MQTT_ERROR_TYPE_CONNECTION_REFUSED)
-    {
-      ESP_LOGI(TAG, "Connection refused error: 0x%x", event->error_handle->connect_return_code);
-    }
-    else
-    {
-      ESP_LOGW(TAG, "Unknown error type: 0x%x", event->error_handle->error_type);
+      if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
+      {
+        ESP_LOGE(TAG, "esp-tls err=0x%x", event->error_handle->esp_tls_last_esp_err);
+        ESP_LOGE(TAG, "tls stack err=0x%x", event->error_handle->esp_tls_stack_err);
+        ESP_LOGE(TAG, "sock errno=%d (%s)", event->error_handle->esp_transport_sock_errno, strerror(event->error_handle->esp_transport_sock_errno));
+      }
+      else if (event->error_handle->error_type == MQTT_ERROR_TYPE_CONNECTION_REFUSED)
+      {
+        ESP_LOGE(TAG, "connection refused=0x%x", event->error_handle->connect_return_code);
+      }
     }
     break;
 
   default:
-    ESP_LOGI(TAG, "Other event id:%d", event->event_id);
+    ESP_LOGD(TAG, "Unhandled MQTT event id=%" PRIi32, event_id);
     break;
   }
 }
 
 esp_err_t dc_mqtt_start(void)
 {
-  const esp_mqtt_client_config_t mqtt_cfg = {.broker = {
-                                                 .address.uri = CONFIG_BROKER_URI,
-                                             }};
+  if (s_handlers_mutex == NULL)
+  {
+    s_handlers_mutex = xSemaphoreCreateMutex();
+    if (s_handlers_mutex == NULL)
+    {
+      return ESP_ERR_NO_MEM;
+    }
+  }
 
-  esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
-  if (client == NULL)
+  if (s_state_mutex == NULL)
+  {
+    s_state_mutex = xSemaphoreCreateMutex();
+    if (s_state_mutex == NULL)
+    {
+      return ESP_ERR_NO_MEM;
+    }
+  }
+
+  const esp_mqtt_client_config_t mqtt_cfg = {
+      .broker.address.uri = CONFIG_DC_MQTT_BROKER_URI,
+  };
+
+  s_mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
+  if (s_mqtt_client == NULL)
   {
     return ESP_FAIL;
   }
-  /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
-  esp_err_t err = esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, dc_mqtt_event_handler, NULL);
+
+  esp_err_t err = esp_mqtt_client_register_event(s_mqtt_client, ESP_EVENT_ANY_ID, dc_mqtt_event_handler, NULL);
   if (err != ESP_OK)
   {
-    ESP_LOGE(TAG, "Failed to register mqtt client event err=%s", esp_err_to_name(err));
+    ESP_LOGE(TAG, "Failed to register MQTT event handler: %s", esp_err_to_name(err));
     return err;
   }
 
-  err = esp_mqtt_client_start(client);
+  err = esp_mqtt_client_start(s_mqtt_client);
   if (err != ESP_OK)
   {
-    ESP_LOGE(TAG, "Failed to start mqtt client err=%s", esp_err_to_name(err));
+    ESP_LOGE(TAG, "Failed to start MQTT client: %s", esp_err_to_name(err));
     return err;
   }
-
-  mqtt_client = client;
 
   if (s_heartbeat_task == NULL)
   {
-    xTaskCreate(dc_mqtt_heartbeat_task, "dc_mqtt_heartbeat", 4096, 0, 5, &s_heartbeat_task);
+    BaseType_t task_ok = xTaskCreate(dc_mqtt_heartbeat_task, "dc_mqtt_heartbeat", 4096, NULL, 5, &s_heartbeat_task);
+
+    if (task_ok != pdPASS)
+    {
+      s_heartbeat_task = NULL;
+      return ESP_ERR_NO_MEM;
+    }
   }
 
   return ESP_OK;
@@ -234,29 +276,33 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
 {
   if (topic == NULL || callback == NULL)
   {
-    ESP_LOGW(TAG, "Failed to register topic handler, invalid argument");
     return ESP_ERR_INVALID_ARG;
   }
 
   if (strlen(topic) >= DC_MQTT_MAX_TOPIC_LEN)
   {
-    ESP_LOGW(TAG, "Failed to register mqtt topic handler, topic length too high");
     return ESP_ERR_INVALID_SIZE;
   }
 
-  taskENTER_CRITICAL(&s_handlers_lock); // CRASHES HERE
+  if (s_handlers_mutex == NULL)
+  {
+    return ESP_ERR_INVALID_STATE;
+  }
 
-  // Prevent duplicate
+  if (xSemaphoreTake(s_handlers_mutex, portMAX_DELAY) != pdTRUE)
+  {
+    return ESP_FAIL;
+  }
+
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
     if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers[i].callback == callback)
     {
-      taskEXIT_CRITICAL(&s_handlers_lock);
+      xSemaphoreGive(s_handlers_mutex);
       return ESP_ERR_INVALID_STATE;
     }
   }
 
-  // Insert
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
     if (!s_handlers[i].in_use)
@@ -264,34 +310,29 @@ esp_err_t dc_mqtt_register_topic_handler(const char* topic, dc_mqtt_topic_callba
       s_handlers[i].in_use = true;
       s_handlers[i].callback = callback;
       s_handlers[i].user_ctx = user_ctx;
-      strcpy(s_handlers[i].topic, topic);
-      taskEXIT_CRITICAL(&s_handlers_lock);
+      strncpy(s_handlers[i].topic, topic, sizeof(s_handlers[i].topic) - 1);
+      s_handlers[i].topic[sizeof(s_handlers[i].topic) - 1] = '\0';
 
-      // Subsribe directly ?
-      bool subscribe_directly = dc_mqtt_is_connected();
+      xSemaphoreGive(s_handlers_mutex);
 
-      if (subscribe_directly)
+      if (dc_mqtt_is_connected() && s_mqtt_client != NULL)
       {
-        int msg_id = esp_mqtt_client_subscribe(mqtt_client, topic, 0);
+        int msg_id = esp_mqtt_client_subscribe(s_mqtt_client, topic, 0);
         if (msg_id < 0)
         {
-          ESP_LOGW(TAG, "Failed to subsribe to topic=%s (immediate)", topic);
+          ESP_LOGW(TAG, "Failed to subscribe to topic=%s", topic);
         }
         else
         {
-          ESP_LOGW(TAG, "Subscribe sent for topic=%s, msg_id=%d (immediate)", topic, msg_id);
+          ESP_LOGI(TAG, "Subscribe sent for topic=%s, msg_id=%d", topic, msg_id);
         }
-      }
-      else
-      {
-        ESP_LOGI(TAG, "New subscription pending for topic=%s", topic);
       }
 
       return ESP_OK;
     }
   }
 
-  // Failed to insert, no slot left
+  xSemaphoreGive(s_handlers_mutex);
   return ESP_ERR_NO_MEM;
 }
 
@@ -302,45 +343,54 @@ esp_err_t dc_mqtt_unregister_topic_handler(const char* topic, dc_mqtt_topic_call
     return ESP_ERR_INVALID_ARG;
   }
 
-  taskENTER_CRITICAL(&s_handlers_lock);
+  if (s_handlers_mutex == NULL)
+  {
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  if (xSemaphoreTake(s_handlers_mutex, portMAX_DELAY) != pdTRUE)
+  {
+    return ESP_FAIL;
+  }
+
   for (int i = 0; i < DC_MQTT_MAX_TOPIC_HANDLERS; i++)
   {
     if (s_handlers[i].in_use && strcmp(s_handlers[i].topic, topic) == 0 && s_handlers[i].callback == callback)
     {
-      // Hard reset to 0
       memset(&s_handlers[i], 0, sizeof(s_handlers[i]));
-      taskEXIT_CRITICAL(&s_handlers_lock);
+      xSemaphoreGive(s_handlers_mutex);
       return ESP_OK;
     }
   }
-  taskEXIT_CRITICAL(&s_handlers_lock);
 
+  xSemaphoreGive(s_handlers_mutex);
   return ESP_ERR_NOT_FOUND;
 }
 
 esp_err_t dc_mqtt_publish(const char* topic, const void* data, size_t data_len, int qos, int retain, bool buffered)
 {
-  if (mqtt_client == NULL || topic == NULL)
+  if (s_mqtt_client == NULL || topic == NULL)
   {
     return ESP_ERR_INVALID_ARG;
   }
 
-  int msg_id;
+  int msg_id = -1;
+
   if (buffered)
   {
-    msg_id = esp_mqtt_client_enqueue(mqtt_client, topic, (const char*)data, (int)data_len, qos, retain, true);
+    msg_id = esp_mqtt_client_enqueue(s_mqtt_client, topic, (const char*)data, (int)data_len, qos, retain, true);
   }
   else
   {
-    msg_id = esp_mqtt_client_publish(mqtt_client, topic, (const char*)data, (int)data_len, qos, retain);
+    msg_id = esp_mqtt_client_publish(s_mqtt_client, topic, (const char*)data, (int)data_len, qos, retain);
   }
 
   if (msg_id < 0)
   {
-    ESP_LOGW(TAG, "Failed to send topic=%s", topic);
+    ESP_LOGW(TAG, "Failed to publish topic=%s", topic);
     return ESP_FAIL;
   }
 
-  ESP_LOGI(TAG, "Sent topic=%s, msg_id=%d", topic, msg_id);
+  ESP_LOGI(TAG, "Published topic=%s, msg_id=%d", topic, msg_id);
   return ESP_OK;
 }
