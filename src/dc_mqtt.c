@@ -264,7 +264,15 @@ esp_err_t dc_mqtt_start(void)
 
     if (task_ok != pdPASS)
     {
+      ESP_LOGE(TAG, "Failed to create the heartbeat mqtt task: %d", task_ok);
+
       s_heartbeat_task = NULL;
+
+      // Don't leave the mqtt client hanging (everything works or nothing)
+      esp_mqtt_client_stop(s_mqtt_client);
+      esp_mqtt_client_destroy(s_mqtt_client);
+      s_mqtt_client = NULL;
+
       return ESP_ERR_NO_MEM;
     }
   }
