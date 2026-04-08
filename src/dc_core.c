@@ -6,7 +6,7 @@ esp_err_t dc_get_device_id(char* out, size_t out_len)
 {
   if (out == NULL || out_len == 0)
   {
-    return;
+    return ESP_ERR_INVALID_ARG;
   }
 
   uint8_t mac[6] = {0};
@@ -20,6 +20,8 @@ esp_err_t dc_get_device_id(char* out, size_t out_len)
   }
 
   snprintf(out, out_len, "esp32%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+  return ESP_OK;
 }
 
 esp_err_t dc_core_init(void)
