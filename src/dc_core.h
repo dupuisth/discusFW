@@ -22,7 +22,7 @@
 
 extern char dc_device_id[DC_DEVICE_ID_LEN];
 
-void dc_get_device_id(char* out, size_t out_len);
+esp_err_t dc_get_device_id(char* out, size_t out_len);
 esp_err_t dc_core_init(void);
 
 #endif
