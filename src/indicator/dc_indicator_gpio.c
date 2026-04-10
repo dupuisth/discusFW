@@ -49,6 +49,9 @@ esp_err_t dc_indicator_set_state(dc_indicator_state_id_t state)
   case DC_INDICATOR_STATE_OFF:
     return dc_indicator_set_gpio_color(0, 0, 0);
 
+  case DC_INDICATOR_STATE_IDLE:
+    return dc_indicator_set_gpio_color(0, 0, 0);
+
   case DC_INDICATOR_STATE_BOOTING:
     return dc_indicator_set_gpio_color(0, 0, 1);
 

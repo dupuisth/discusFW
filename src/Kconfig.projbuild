@@ -97,6 +97,7 @@ menu "discusFW Configuration"
 
             config DC_INDICATOR_TYPE_GPIO_SINGLE
                 bool "GPIO_SINGLE (Not supported for now)"
+                depends on BROKEN
         endchoice
 
         config DC_ESP_INDICATOR_GPIO_R
