@@ -1,4 +1,4 @@
-#include "dc_wifi.h"
+#include <discusFW/wifi/dc_wifi.h>
 
 static EventGroupHandle_t s_wifi_event_group = NULL;
 static int s_retry_num = 0;

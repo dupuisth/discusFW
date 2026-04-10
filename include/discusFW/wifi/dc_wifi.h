@@ -1,11 +1,12 @@
 #ifndef DC_WIFI_H
 #define DC_WIFI_H
 
-#include "dc_core.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+
+#include <discusFW/dc_core.h>
 
 #define DC_ESP_WIFI_SSID CONFIG_DC_ESP_WIFI_SSID
 #define DC_ESP_WIFI_PASS CONFIG_DC_ESP_WIFI_PASSWORD

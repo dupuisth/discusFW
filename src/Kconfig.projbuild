@@ -1,84 +1,124 @@
 menu "discusFW Configuration"
 
-    config DC_ESP_WIFI_SSID
-        string "WiFi SSID"
-        default ""
-        help
-            SSID of the target WiFi access point.
+    menu "WiFi"
+        config DC_ESP_WIFI_SSID
+            string "WiFi SSID"
+            default ""
+            help
+                SSID of the target WiFi access point.
 
-    config DC_ESP_WIFI_PASSWORD
-        string "WiFi Password"
-        default ""
-        help
-            Password of the target WiFi access point.
+        config DC_ESP_WIFI_PASSWORD
+            string "WiFi Password"
+            default ""
+            help
+                Password of the target WiFi access point.
 
-    config DC_ESP_MAXIMUM_RETRY
-        int "Maximum WiFi connect retries"
-        default 5
-        range 0 100
-        help
-            Number of reconnection attempts before giving up.
+        config DC_ESP_MAXIMUM_RETRY
+            int "Maximum WiFi connect retries"
+            default 5
+            range 0 100
+            help
+                Number of reconnection attempts before giving up.
 
-    choice DC_ESP_WIFI_AUTH_THRESHOLD
-        prompt "WiFi authmode threshold"
-        default DC_ESP_WIFI_AUTH_WPA2_PSK
+        choice DC_ESP_WIFI_AUTH_THRESHOLD
+            prompt "WiFi authmode threshold"
+            default DC_ESP_WIFI_AUTH_WPA2_PSK
 
-        config DC_ESP_WIFI_AUTH_OPEN
-            bool "OPEN"
+            config DC_ESP_WIFI_AUTH_OPEN
+                bool "OPEN"
 
-        config DC_ESP_WIFI_AUTH_WEP
-            bool "WEP"
+            config DC_ESP_WIFI_AUTH_WEP
+                bool "WEP"
 
-        config DC_ESP_WIFI_AUTH_WPA_PSK
-            bool "WPA-PSK"
+            config DC_ESP_WIFI_AUTH_WPA_PSK
+                bool "WPA-PSK"
 
-        config DC_ESP_WIFI_AUTH_WPA2_PSK
-            bool "WPA2-PSK"
+            config DC_ESP_WIFI_AUTH_WPA2_PSK
+                bool "WPA2-PSK"
 
-        config DC_ESP_WIFI_AUTH_WPA_WPA2_PSK
-            bool "WPA/WPA2-PSK"
+            config DC_ESP_WIFI_AUTH_WPA_WPA2_PSK
+                bool "WPA/WPA2-PSK"
 
-        config DC_ESP_WIFI_AUTH_WPA3_PSK
-            bool "WPA3-PSK"
+            config DC_ESP_WIFI_AUTH_WPA3_PSK
+                bool "WPA3-PSK"
 
-        config DC_ESP_WIFI_AUTH_WPA2_WPA3_PSK
-            bool "WPA2/WPA3-PSK"
+            config DC_ESP_WIFI_AUTH_WPA2_WPA3_PSK
+                bool "WPA2/WPA3-PSK"
 
-        config DC_ESP_WIFI_AUTH_WAPI_PSK
-            bool "WAPI-PSK"
-    endchoice
+            config DC_ESP_WIFI_AUTH_WAPI_PSK
+                bool "WAPI-PSK"
+        endchoice
 
-    choice DC_ESP_STATION_WPA3_SAE_PWE_MODE
-        prompt "WPA3 SAE PWE mode"
-        default DC_ESP_STATION_WPA3_SAE_PWE_HUNT_AND_PECK
+        choice DC_ESP_STATION_WPA3_SAE_PWE_MODE
+            prompt "WPA3 SAE PWE mode"
+            default DC_ESP_STATION_WPA3_SAE_PWE_HUNT_AND_PECK
 
-        config DC_ESP_STATION_WPA3_SAE_PWE_HUNT_AND_PECK
-            bool "Hunt and Peck"
+            config DC_ESP_STATION_WPA3_SAE_PWE_HUNT_AND_PECK
+                bool "Hunt and Peck"
 
-        config DC_ESP_STATION_WPA3_SAE_PWE_HASH_TO_ELEMENT
-            bool "Hash to Element (H2E)"
+            config DC_ESP_STATION_WPA3_SAE_PWE_HASH_TO_ELEMENT
+                bool "Hash to Element (H2E)"
 
-        config DC_ESP_STATION_WPA3_SAE_PWE_BOTH
-            bool "Both"
-    endchoice
+            config DC_ESP_STATION_WPA3_SAE_PWE_BOTH
+                bool "Both"
+        endchoice
 
-    config DC_ESP_WIFI_PW_ID
-        string "WPA3 SAE H2E identifier"
-        default ""
-        depends on DC_ESP_STATION_WPA3_SAE_PWE_HASH_TO_ELEMENT || DC_ESP_STATION_WPA3_SAE_PWE_BOTH
-        help
-            Optional password identifier for WPA3 SAE H2E.
+        config DC_ESP_WIFI_PW_ID
+            string "WPA3 SAE H2E identifier"
+            default ""
+            depends on DC_ESP_STATION_WPA3_SAE_PWE_HASH_TO_ELEMENT || DC_ESP_STATION_WPA3_SAE_PWE_BOTH
+            help
+                Optional password identifier for WPA3 SAE H2E.
+    endmenu
+    
 
-    config DC_MQTT_BROKER_URI
-        string "MQTT Broker URI"
-        default "mqtt://broker.local"
-        help
-            MQTT broker URI.
+    menu "MQTT"
+        config DC_MQTT_BROKER_URI
+            string "MQTT Broker URI"
+            default "mqtt://broker.local"
+            help
+                MQTT broker URI.
 
-    config DC_MQTT_HEARTBEAT_INTERVAL_MS
-        int "MQTT heartbeat interval (ms)"
-        default 10000
-        range 1000 3600000
-        help
-            Interval between heartbeat publications.
+        config DC_MQTT_HEARTBEAT_INTERVAL_MS
+            int "MQTT heartbeat interval (ms)"
+            default 10000
+            range 1000 3600000
+            help
+                Interval between heartbeat publications.
+    endmenu
+
+    menu "Indicator"
+        choice DC_INDICATOR_TYPE
+            prompt "Indicator type"
+            default DC_INDICATOR_TYPE_GPIO_RGB
+
+            config DC_INDICATOR_TYPE_GPIO_RGB
+                bool "GPIO_RGB"
+
+            config DC_INDICATOR_TYPE_GPIO_SINGLE
+                bool "GPIO_SINGLE (Not supported for now)"
+                depends on BROKEN
+        endchoice
+
+        config DC_ESP_INDICATOR_GPIO_R
+            int "Indicator GPIO Red"
+            default 0
+            depends on DC_INDICATOR_TYPE_GPIO_RGB
+            help
+                GPIO Pin for the RED indicator leds
+
+        config DC_ESP_INDICATOR_GPIO_G
+            int "Indicator GPIO Green"
+            default 0
+            depends on DC_INDICATOR_TYPE_GPIO_RGB
+            help
+                GPIO Pin for the GREEN indicator led
+
+        config DC_ESP_INDICATOR_GPIO_B
+            int "Indicator GPIO Blue"
+            default 0
+            depends on DC_INDICATOR_TYPE_GPIO_RGB
+            help
+                GPIO Pin for the BLUE indicator led
+    endmenu
 endmenu

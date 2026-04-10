@@ -1,4 +1,5 @@
-#include "dc_core.h"
+#include <discusFW/dc_core.h>
+#include <discusFW/indicator/dc_indicator.h>
 
 char dc_device_id[DC_DEVICE_ID_LEN] = {0};
 
@@ -39,6 +40,12 @@ esp_err_t dc_core_init(void)
   }
 
   err = dc_get_device_id(dc_device_id, sizeof(dc_device_id));
+  if (err != ESP_OK)
+  {
+    return err;
+  }
+
+  err = dc_indicator_initialize();
   if (err != ESP_OK)
   {
     return err;
