@@ -1,6 +1,6 @@
-#include "dc_core.h"
-#include "dc_mqtt.h"
-#include "dc_wifi.h"
+#include <discusFW/dc_core.h>
+#include <discusFW/mqtt/dc_mqtt.h>
+#include <discusFW/wifi/dc_wifi.h>
 
 void app_main(void)
 {

@@ -1,4 +1,4 @@
-#include "dc_core.h"
+#include <discusFW/dc_core.h>
 
 char dc_device_id[DC_DEVICE_ID_LEN] = {0};
 

@@ -1,7 +1,7 @@
 #ifndef DC_MQTT_H
 #define DC_MQTT_H
 
-#include "dc_core.h"
+#include <discusFW/dc_core.h>
 
 #define DC_MQTT_MAX_TOPIC_HANDLERS 8
 #define DC_MQTT_MAX_TOPIC_LEN 128
