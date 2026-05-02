@@ -17,7 +17,7 @@ esp_err_t dc_get_device_id(char* out, size_t out_len)
   {
     ESP_LOGE(TAG, "Failed to read MAC: %s", esp_err_to_name(err));
     out[0] = '\0';
-    return err;
+    //return err;
   }
 
   snprintf(out, out_len, "esp32%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);

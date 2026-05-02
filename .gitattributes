@@ -1,0 +1,14 @@
+* text=auto
+
+# Force LF endings on these files 
+*.sh text eol=lf
+*.py text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+*.cmake text eol=lf
+*.json text eol=lf
+*.ini text eol=lf
+*.projbuild text eol=lf
+CMakeLists.txt text eol=lf

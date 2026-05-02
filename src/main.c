@@ -11,6 +11,7 @@ void app_main(void)
 
   ESP_LOGI(TAG, "Device ID: %s", dc_device_id);
 
+  #if CONFIG_DC_ESP_USE_WIFI
   if (dc_wifi_init_sta() != ESP_OK)
   {
     dc_indicator_set_state(DC_INDICATOR_STATE_FATAL);
@@ -24,6 +25,9 @@ void app_main(void)
     ESP_LOGE(TAG, "MQTT start failed");
     return;
   }
+
+  #endif
+
 
   ESP_LOGI(TAG, "discusFW started");
 

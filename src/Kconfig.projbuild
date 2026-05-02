@@ -1,15 +1,23 @@
 menu "discusFW Configuration"
 
     menu "WiFi"
+        config DC_ESP_USE_WIFI
+            bool "Use WiFi"
+            default false
+            help
+                Enable the WiFi feature
+
         config DC_ESP_WIFI_SSID
             string "WiFi SSID"
             default ""
+            depends on DC_ESP_USE_WIFI
             help
                 SSID of the target WiFi access point.
 
         config DC_ESP_WIFI_PASSWORD
             string "WiFi Password"
             default ""
+            depends on DC_ESP_USE_WIFI
             help
                 Password of the target WiFi access point.
 
@@ -17,12 +25,14 @@ menu "discusFW Configuration"
             int "Maximum WiFi connect retries"
             default 5
             range 0 100
+            depends on DC_ESP_USE_WIFI
             help
                 Number of reconnection attempts before giving up.
 
         choice DC_ESP_WIFI_AUTH_THRESHOLD
             prompt "WiFi authmode threshold"
             default DC_ESP_WIFI_AUTH_WPA2_PSK
+            depends on DC_ESP_USE_WIFI
 
             config DC_ESP_WIFI_AUTH_OPEN
                 bool "OPEN"

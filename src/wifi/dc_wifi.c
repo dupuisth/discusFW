@@ -1,5 +1,7 @@
 #include <discusFW/wifi/dc_wifi.h>
 
+#if CONFIG_DC_ESP_USE_WIFI
+
 static EventGroupHandle_t s_wifi_event_group = NULL;
 static int s_retry_num = 0;
 
@@ -105,3 +107,5 @@ esp_err_t dc_wifi_init_sta(void)
 
   return ESP_ERR_INVALID_STATE;
 }
+
+#endif

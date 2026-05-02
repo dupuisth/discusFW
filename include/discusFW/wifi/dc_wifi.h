@@ -1,6 +1,8 @@
 #ifndef DC_WIFI_H
 #define DC_WIFI_H
 
+#if CONFIG_DC_ESP_USE_WIFI
+
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "lwip/err.h"
@@ -45,5 +47,7 @@
 #define DC_WIFI_FAIL_BIT BIT1
 
 esp_err_t dc_wifi_init_sta(void);
+
+#endif
 
 #endif
