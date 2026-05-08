@@ -1,33 +1,26 @@
 {
-	"name": "PlatformIO (Community)",
+	"name": "ESP-IDF",
 	"build": {
-		"dockerfile": "Containerfile",
-		"context": ".",
-		"args": {
-			"FEDORA_COMPAT" : "1", // enables fedora compatibility mode (extra dialout group with gid 18)
-			"VARIANT": "bookworm"
-		}
+		"dockerfile": "Dockerfile"
 	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/discus,type=bind",
+	"workspaceFolder": "/workspaces/discus",
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"terminal.integrated.defaultProfile.linux": "zsh"
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"idf.gitPath": "/usr/bin/git"
 			},
 			"extensions": [
-				"ms-vscode.cpptools",
-				"platformio.platformio-ide"
+				"espressif.esp-idf-extension",
+				"espressif.esp-idf-web",
+				"ms-vscode.cpptools-extension-pack",
+				"donjayamanne.git-extension-pack"
 			]
 		}
 	},
-	"forwardPorts": [
-		8008
-	],
-	"mounts": [
-		"source=/dev/,target=/dev/,type=bind,consistency=consistent"
-	],
 	"runArgs": [
 		"--privileged"
 	],
-	"features": {},
-	"postAttachCommand": "sudo service udev restart"
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && ./.devcontainer/post-create.sh"
 }

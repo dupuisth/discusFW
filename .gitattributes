@@ -9,6 +9,5 @@
 *.hpp text eol=lf
 *.cmake text eol=lf
 *.json text eol=lf
-*.ini text eol=lf
-*.projbuild text eol=lf
+*.lock text eol=lf
 CMakeLists.txt text eol=lf

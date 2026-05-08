@@ -1,0 +1,9 @@
+dependencies:
+  idf:
+    version: ">=4.1.0"
+  espressif/esp-zigbee-lib:
+    version: "*"
+  espressif/esp-zboss-lib:
+    version: "*"
+  discus:
+    path: "../discus"
