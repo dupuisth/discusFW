@@ -1,0 +1,28 @@
+{
+	"name": "ESP-IDF",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/discus,type=bind",
+	"workspaceFolder": "/workspaces/discus",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"idf.gitPath": "/usr/bin/git"
+			},
+			"extensions": [
+				"espressif.esp-idf-extension",
+				"espressif.esp-idf-web",
+				"ms-vscode.cpptools-extension-pack",
+				"donjayamanne.git-extension-pack",
+				"xaver.clang-format"
+			]
+		}
+	},
+	"runArgs": [
+		"--privileged",
+		"--device=${localEnv:ESP_PORT}:/dev/ttyESP"
+	],
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod u+x ./.devcontainer/*.sh && ./.devcontainer/post-create.sh"
+}

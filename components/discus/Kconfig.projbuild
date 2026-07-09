@@ -1,0 +1,80 @@
+menu "discus"
+
+    menu "Indicator"
+
+        menu "System"
+            
+        choice DC_LED_INDICATOR_SYSTEM_TYPE
+            prompt "Indicator type for System Status LED"
+            default DC_LED_INDICATOR_SYSTEM_TYPE_RMT
+
+            config DC_LED_INDICATOR_SYSTEM_TYPE_RMT
+                bool "RMT"
+
+            config DC_LED_INDICATOR_SYSTEM_TYPE_RGB
+                bool "RBG GPIO"
+
+            config DC_LED_INDICATOR_SYSTEM_TYPE_DISABLED
+                bool "Disabled"
+        endchoice
+
+        config DC_LED_INDICATOR_SYSTEM_RMT_GPIO
+            int "System indicator RMT GPIO"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RMT
+            default 8
+        
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_R
+            int "System indicator GPIO Red"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
+
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_G
+            int "System indicator GPIO Green"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
+
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_B
+            int "System indicator GPIO Blue"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
+        
+        endmenu
+
+        menu "Zigbee"
+            choice DC_LED_INDICATOR_ZIGBEE_TYPE
+                prompt "Indicator type for Zigbee Status LED"
+                default DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_RMT
+                    bool "RMT"
+
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+                    bool "RBG GPIO"
+                
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_DISABLED
+                    bool "Disabled"
+            endchoice
+
+            config DC_LED_INDICATOR_ZIGBEE_RMT_GPIO
+                int "Zigbee indicator RMT GPIO"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RMT
+            
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_R
+                int "Zigbee indicator GPIO Red"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+                default 0
+
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_G
+                int "Zigbee indicator GPIO Green"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+                default 11
+
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_B
+                int "Zigbee indicator GPIO Blue"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+                default 10
+        endmenu
+
+        config DC_LED_INDICATOR_MAX_VALUE
+            int "Max intensity"
+            range 0 255
+            default 5
+    endmenu
+endmenu
