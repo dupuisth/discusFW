@@ -15,7 +15,16 @@ PointerAlignment: Left
 ReferenceAlignment: Left
 
 SortIncludes: true
-IncludeBlocks: Regroup
+IncludeBlocks: Merge
+IncludeCategories:
+  - Regex: '^<discus/'
+    Priority: 2
+  - Regex: '^<discus_zigbee/'
+    Priority: 3
+  - Regex: '^<esp'
+    Priority: 1
+  - Regex: '.*'
+    Priority: 0
 
 # --- Paramètres ---
 BinPackParameters: false
@@ -27,3 +36,6 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 BreakConstructorInitializers: AfterColon
 BreakConstructorInitializersBeforeComma: false
 ConstructorInitializerIndentWidth: 4
+
+# --- Template ---
+AlwaysBreakTemplateDeclarations: Yes

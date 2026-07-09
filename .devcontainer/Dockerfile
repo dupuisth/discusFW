@@ -4,7 +4,7 @@ FROM espressif/idf:${DOCKER_TAG}
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-RUN apt-get update -y && apt-get install udev dfu-util libssl-dev python3-dev pkg-config libglib2.0-dev libevent-dev -y
+RUN apt-get update -y && apt-get install udev dfu-util libssl-dev python3-dev pkg-config libglib2.0-dev libevent-dev clang-format -y
 
 RUN echo "source /opt/esp/idf/export.sh > /dev/null 2>&1" >> ~/.bashrc
 

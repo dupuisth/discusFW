@@ -15,12 +15,14 @@
 				"espressif.esp-idf-extension",
 				"espressif.esp-idf-web",
 				"ms-vscode.cpptools-extension-pack",
-				"donjayamanne.git-extension-pack"
+				"donjayamanne.git-extension-pack",
+				"xaver.clang-format"
 			]
 		}
 	},
 	"runArgs": [
-		"--privileged"
+		"--privileged",
+		"--device=/dev/serial/by-id/usb-1a86_USB_Single_Serial_5AE7054095-if00:/dev/ttyESP"
 	],
-	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && ./.devcontainer/post-create.sh"
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod u+x ./.devcontainer/*.sh && ./.devcontainer/post-create.sh"
 }

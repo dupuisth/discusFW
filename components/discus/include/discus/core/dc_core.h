@@ -1,11 +1,8 @@
 #ifndef DC_CORE_H
 #define DC_CORE_H
 
-#include <discus/core/dc_indicator.h>
 #include <esp_err.h>
-
-extern dc_indicator_t dc_indicator_global;
-extern dc_indicator_t dc_indicator_connectivity;
+#include <discus/indicator/dc_led_indicator.h>
 
 esp_err_t dc_init(void);
 
