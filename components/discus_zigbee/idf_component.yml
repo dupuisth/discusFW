@@ -1,9 +1,7 @@
 dependencies:
   idf:
-    version: ">=4.1.0"
+    version: "5.5.4"
   espressif/esp-zigbee-lib:
-    version: "*"
-  espressif/esp-zboss-lib:
-    version: "*"
+    version: ">=2.0.0"
   discus:
     path: "../discus"

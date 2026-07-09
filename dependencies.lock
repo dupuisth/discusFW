@@ -2,23 +2,13 @@ dependencies:
   discus:
     dependencies:
     - name: idf
-      version: '>=4.1.0'
+      version: 5.5.4
     - name: espressif/led_strip
       version: ^3
     source:
       path: /workspaces/discus/components/discus
       type: local
     version: '*'
-  espressif/esp-zboss-lib:
-    component_hash: 321883d142421f65009972408287441794250057668a11abbdfd8bec77c3309a
-    dependencies:
-    - name: idf
-      require: private
-      version: '>=5.0'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 1.6.4
   espressif/esp-zigbee-lib:
     component_hash: 823ee1604d896bdcfd3d5dbe2b1eb84fdf089cffcbbe50e46d01d647861710ba
     dependencies:
@@ -42,13 +32,12 @@ dependencies:
   idf:
     source:
       type: idf
-    version: 5.4.1
+    version: 5.5.4
 direct_dependencies:
 - discus
-- espressif/esp-zboss-lib
 - espressif/esp-zigbee-lib
 - espressif/led_strip
 - idf
-manifest_hash: 8039b909edfe63ca194efac91356877e58855512e500cc4ebd8d036b64c30cf0
+manifest_hash: 53df6e553dc8b10cb883e6485fe73f969420d4a3d96d6ee498d93431169aa6d7
 target: esp32h2
 version: 2.0.0

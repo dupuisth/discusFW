@@ -43,23 +43,55 @@ static void dc_led_indicator_status_callback(dc_status_domain_t domain, dc_statu
 
 esp_err_t dc_led_indicator_init()
 {
-  esp_err_t err = ESP_OK;
-
   for (uint8_t i = 0; i < DC_STATUS_DOMAIN_LAST_ENUM; i++)
   {
     dc_led_indicators[i].enabled = false;
   }
 
-  // System
-  dc_led_indicator_create_rgb(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM], 0, 11, 10);
-  dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM]);
-  dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM].enabled = true;
+// System
+#ifndef CONFIG_DC_LED_INDICATOR_SYSTEM_TYPE_DISABLED
+#if CONFIG_DC_LED_INDICATOR_SYSTEM_TYPE_RGB
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rgb(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM],
+                          CONFIG_DC_LED_INDICATOR_SYSTEM_RGB_GPIO_R,
+                          CONFIG_DC_LED_INDICATOR_SYSTEM_RGB_GPIO_G,
+                          CONFIG_DC_LED_INDICATOR_SYSTEM_RGB_GPIO_B),
+      TAG,
+      "Failed to create System indicator");
+#elif CONFIG_DC_LED_INDICATOR_SYSTEM_TYPE_RMT
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rmt(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM], CONFIG_DC_LED_INDICATOR_SYSTEM_RMT_GPIO),
+      TAG,
+      "Failed to create System indicator");
+#else
+#error Undefined behavior
+#endif
+  ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM]), TAG, "Failed to init Zigbee indicator");
+#endif
+
+  // Zigbee
+#ifndef CONFIG_DC_LED_INDICATOR_ZIGBEE_TYPE_DISABLED
+#if CONFIG_DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rgb(&dc_led_indicators[DC_STATUS_DOMAIN_ZIGBEE],
+                          CONFIG_DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_R,
+                          CONFIG_DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_G,
+                          CONFIG_DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_B),
+      TAG,
+      "Failed to create Zigbee indicator");
+#elif CONFIG_DC_LED_INDICATOR_ZIGBEE_TYPE_RMT
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rmt(&dc_led_indicators[DC_STATUS_DOMAIN_ZIGBEE], CONFIG_DC_LED_INDICATOR_ZIGBEE_RMT_GPIO),
+      TAG,
+      "Failed to create Zigbee indicator");
+#else
+#error Undefined behavior
+#endif
+  ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_ZIGBEE]), TAG, "Failed to init Zigbee indicator");
+#endif
 
   // Register to the status callback
-  err = dc_status_manager_register_callback(dc_led_indicator_status_callback, true);
-  ESP_RETURN_ON_ERROR(err, TAG, "Failed to add dc_led_indicator to the status manager callback");
+  ESP_RETURN_ON_ERROR(dc_status_manager_register_callback(dc_led_indicator_status_callback, true),
+      TAG,
+      "Failed to add dc_led_indicator to the status manager callback");
 
-  return err;
+  return ESP_OK;
 }
 
 esp_err_t dc_led_indicator_create_rmt(dc_led_indicator_t* indicator, uint8_t rmt_gpio)
@@ -81,6 +113,7 @@ esp_err_t dc_led_indicator_create_rgb(dc_led_indicator_t* indicator, uint8_t r_g
 esp_err_t dc_led_indicator_init_indicator(dc_led_indicator_t* indicator)
 {
   esp_err_t err = ESP_OK;
+  indicator->enabled = false;
   if (indicator->is_rmt)
   {
     // Initialize using RMT
@@ -93,30 +126,27 @@ esp_err_t dc_led_indicator_init_indicator(dc_led_indicator_t* indicator)
     led_strip_rmt_config_t rmt_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT, .resolution_hz = (10 * 1000 * 1000), .mem_block_symbols = 0, .flags = {.with_dma = false}};
 
-    err = ESP_ERROR_CHECK_WITHOUT_ABORT(led_strip_new_rmt_device(&strip_config, &rmt_config, &indicator->led_strip_handle));
-
-    if (err != ESP_OK)
-    {
-      indicator->enabled = false;
-    }
-
-    return err;
+    err = led_strip_new_rmt_device(&strip_config, &rmt_config, &indicator->led_strip_handle);
+    ESP_RETURN_ON_ERROR(err, TAG, "Failed to create rmt device");
   }
   else
   {
     // Initialize using multiples GPIO
-    err = ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_direction(indicator->r_gpio, GPIO_MODE_OUTPUT));
-    if (err != ESP_OK)
-      return err;
+    err = gpio_set_direction(indicator->r_gpio, GPIO_MODE_OUTPUT);
+    ESP_RETURN_ON_ERROR(err, TAG, "Failed to set r_gpio to output (%u)", (unsigned int)indicator->r_gpio);
 
-    err = ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_direction(indicator->g_gpio, GPIO_MODE_OUTPUT));
-    if (err != ESP_OK)
-      return err;
+    err = gpio_set_direction(indicator->g_gpio, GPIO_MODE_OUTPUT);
+    ESP_RETURN_ON_ERROR(err, TAG, "Failed to set g_gpio to output (%u)", (unsigned int)indicator->g_gpio);
 
-    err = ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_direction(indicator->b_gpio, GPIO_MODE_OUTPUT));
-    if (err != ESP_OK)
-      return err;
+    err = gpio_set_direction(indicator->b_gpio, GPIO_MODE_OUTPUT);
+    ESP_RETURN_ON_ERROR(err, TAG, "Failed to set b_gpio to output (%u)", (unsigned int)indicator->b_gpio);
   }
+
+  if (err == ESP_OK)
+  {
+    indicator->enabled = true;
+  }
+
   return err;
 }
 
@@ -131,14 +161,14 @@ esp_err_t dc_led_indicator_set_color(dc_led_indicator_t* indicator, uint8_t r, u
 
   if (indicator->is_rmt)
   {
-    if (r > CONFIG_DC_INDICATOR_MAX_VALUE)
-      r = CONFIG_DC_INDICATOR_MAX_VALUE;
+    if (r > CONFIG_DC_LED_INDICATOR_MAX_VALUE)
+      r = CONFIG_DC_LED_INDICATOR_MAX_VALUE;
 
-    if (g > CONFIG_DC_INDICATOR_MAX_VALUE)
-      g = CONFIG_DC_INDICATOR_MAX_VALUE;
+    if (g > CONFIG_DC_LED_INDICATOR_MAX_VALUE)
+      g = CONFIG_DC_LED_INDICATOR_MAX_VALUE;
 
-    if (b > CONFIG_DC_INDICATOR_MAX_VALUE)
-      b = CONFIG_DC_INDICATOR_MAX_VALUE;
+    if (b > CONFIG_DC_LED_INDICATOR_MAX_VALUE)
+      b = CONFIG_DC_LED_INDICATOR_MAX_VALUE;
 
     err = ESP_ERROR_CHECK_WITHOUT_ABORT(led_strip_set_pixel(indicator->led_strip_handle, 0, r, g, b));
     if (err != ESP_OK)

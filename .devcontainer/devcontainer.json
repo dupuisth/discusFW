@@ -22,7 +22,7 @@
 	},
 	"runArgs": [
 		"--privileged",
-		"--device=/dev/serial/by-id/usb-1a86_USB_Single_Serial_5AE7054095-if00:/dev/ttyESP"
+		"--device=${localEnv:ESP_PORT}:/dev/ttyESP"
 	],
 	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod u+x ./.devcontainer/*.sh && ./.devcontainer/post-create.sh"
 }

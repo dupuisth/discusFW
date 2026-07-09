@@ -2,78 +2,77 @@ menu "discus"
 
     menu "Indicator"
 
-        menu "Global"
+        menu "System"
             
-        choice DC_INDICATOR_GLOBAL_TYPE
-            prompt "Indicator type for Global Status LED"
-            default DC_INDICATOR_GLOBAL_TYPE_RMT
+        choice DC_LED_INDICATOR_SYSTEM_TYPE
+            prompt "Indicator type for System Status LED"
+            default DC_LED_INDICATOR_SYSTEM_TYPE_RMT
 
-            config DC_INDICATOR_GLOBAL_TYPE_RMT
+            config DC_LED_INDICATOR_SYSTEM_TYPE_RMT
                 bool "RMT"
 
-            config DC_INDICATOR_GLOBAL_TYPE_RGB
+            config DC_LED_INDICATOR_SYSTEM_TYPE_RGB
                 bool "RBG GPIO"
 
-            config DC_INDICATOR_GLOBAL_TYPE_DISABLED
+            config DC_LED_INDICATOR_SYSTEM_TYPE_DISABLED
                 bool "Disabled"
         endchoice
 
-        config DC_INDICATOR_GLOBAL_RMT_GPIO
-            int "Global indicator RMT GPIO"
-            depends on DC_INDICATOR_GLOBAL_TYPE_RMT
+        config DC_LED_INDICATOR_SYSTEM_RMT_GPIO
+            int "System indicator RMT GPIO"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RMT
             default 8
         
-        config DC_INDICATOR_GLOBAL_RGB_GPIO_R
-            int "Global indicator GPIO Red"
-            depends on DC_INDICATOR_GLOBAL_TYPE_RGB
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_R
+            int "System indicator GPIO Red"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
 
-        config DC_INDICATOR_GLOBAL_RGB_GPIO_G
-            int "Global indicator GPIO Green"
-            depends on DC_INDICATOR_GLOBAL_TYPE_RGB
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_G
+            int "System indicator GPIO Green"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
 
-        config DC_INDICATOR_GLOBAL_RGB_GPIO_B
-            int "Global indicator GPIO Blue"
-            depends on DC_INDICATOR_GLOBAL_TYPE_RGB
+        config DC_LED_INDICATOR_SYSTEM_RGB_GPIO_B
+            int "System indicator GPIO Blue"
+            depends on DC_LED_INDICATOR_SYSTEM_TYPE_RGB
         
         endmenu
 
-        menu "Connectivity"
-            choice DC_INDICATOR_CONNECTIVITY_TYPE
-                prompt "Indicator type for Connectivity Status LED"
-                default DC_INDICATOR_CONNECTIVITY_TYPE_RGB
+        menu "Zigbee"
+            choice DC_LED_INDICATOR_ZIGBEE_TYPE
+                prompt "Indicator type for Zigbee Status LED"
+                default DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
 
-                config DC_INDICATOR_CONNECTIVITY_TYPE_RMT
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_RMT
                     bool "RMT"
 
-                config DC_INDICATOR_CONNECTIVITY_TYPE_RGB
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
                     bool "RBG GPIO"
                 
-                config DC_INDICATOR_CONNECTIVITY_TYPE_DISABLED
+                config DC_LED_INDICATOR_ZIGBEE_TYPE_DISABLED
                     bool "Disabled"
             endchoice
 
-            config DC_INDICATOR_CONNECTIVITY_RMT_GPIO
-                int "Global indicator RMT GPIO"
-                depends on DC_INDICATOR_CONNECTIVITY_TYPE_RMT
+            config DC_LED_INDICATOR_ZIGBEE_RMT_GPIO
+                int "Zigbee indicator RMT GPIO"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RMT
             
-            config DC_INDICATOR_CONNECTIVITY_RGB_GPIO_R
-                int "Global indicator GPIO Red"
-                depends on DC_INDICATOR_CONNECTIVITY_TYPE_RGB
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_R
+                int "Zigbee indicator GPIO Red"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
                 default 0
 
-            config DC_INDICATOR_CONNECTIVITY_RGB_GPIO_G
-                int "Global indicator GPIO Green"
-                depends on DC_INDICATOR_CONNECTIVITY_TYPE_RGB
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_G
+                int "Zigbee indicator GPIO Green"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
                 default 11
 
-            config DC_INDICATOR_CONNECTIVITY_RGB_GPIO_B
-                int "Global indicator GPIO Blue"
-                depends on DC_INDICATOR_CONNECTIVITY_TYPE_RGB
+            config DC_LED_INDICATOR_ZIGBEE_RGB_GPIO_B
+                int "Zigbee indicator GPIO Blue"
+                depends on DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
                 default 10
-        
         endmenu
 
-        config DC_INDICATOR_MAX_VALUE
+        config DC_LED_INDICATOR_MAX_VALUE
             int "Max intensity"
             range 0 255
             default 5

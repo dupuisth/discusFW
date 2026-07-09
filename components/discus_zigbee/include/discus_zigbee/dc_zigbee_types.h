@@ -1,0 +1,4 @@
+#ifndef DC_ZIGBEE_TYPES_H
+#define DC_ZIGBEE_TYPES_H
+
+#endif // DC_ZIGBEE_TYPES_H

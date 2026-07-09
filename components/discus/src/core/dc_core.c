@@ -16,7 +16,6 @@ esp_err_t dc_init(void)
   if (err)
   {
     dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_FATAL, 0);
-
     return err;
   }
 
