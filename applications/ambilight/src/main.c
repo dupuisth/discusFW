@@ -15,7 +15,7 @@ void app_main(void)
   dc_init();
 
   dc_ledstrip_t ledstrip;
-  if (dc_ledstrip_create(4, 1, &ledstrip) != ESP_OK)
+  if (dc_ledstrip_create(4, 16, &ledstrip) != ESP_OK)
   {
     dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_FATAL, 0);
     vTaskDelay(pdMS_TO_TICKS(5000));
@@ -43,7 +43,7 @@ void app_main(void)
     return;
   }
 
-  dc_ambilight_transport_uart_set_single_pixel(&transport, (dc_rgb8_t){.r = 255, .g = 0, .b = 5}, 0);
+  dc_ambilight_transport_uart_set_single_pixel(&transport, (dc_rgb8_t){.r = 255, .g = 0, .b = 5}, 1);
   while (true)
   {
     vTaskDelay(pdMS_TO_TICKS(100));

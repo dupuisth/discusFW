@@ -89,41 +89,32 @@ esp_err_t dc_ambilight_transport_uart_poll(dc_ambilight_transport_handler_t* tra
 {
   dc_ambilight_transport_uart_data_t* data = (dc_ambilight_transport_uart_data_t*)transport->transport_data;
 
-  char buffer;
-  int rx_length = 10;
+  const int SizeOfFrame = sizeof(dc_ambilight_transport_uart_frame_t);
+  int rx_length = 0;
   ESP_ERROR_CHECK(dc_uart_read_size(&data->uart_device, &rx_length));
 
-  char tx_buffer[64];
-
-  sprintf(tx_buffer, "%d\r\n", rx_length);
-  dc_uart_write(&data->uart_device, tx_buffer, strlen(tx_buffer), NULL);
-
-  for (int i = 0; i < rx_length; i++)
+  while (rx_length >= SizeOfFrame)
   {
-    dc_uart_read(&data->uart_device, &buffer, 1, NULL);
-    ESP_LOGI(TAG, "%c", buffer);
+    // Can read a full frame from it.
+    dc_ambilight_transport_uart_frame_t frame;
+    ESP_ERROR_CHECK(dc_uart_read(&data->uart_device, &frame, sizeof(dc_ambilight_transport_uart_frame_t), NULL));
+    ESP_ERROR_CHECK(dc_ambilight_transport_uart_handle_frame(transport, &frame));
 
-    if (buffer == '0')
-    {
-      transport->set_single_pixel_handler(transport, (dc_rgb8_t){.r = 64, .g = 128, .b = 64}, 0);
-    }
-    else if (buffer == '1')
-    {
-      transport->set_single_pixel_handler(transport, (dc_rgb8_t){.r = 16, .g = 16, .b = 64}, 0);
-    }
-    else if (buffer == '2')
-    {
-      transport->set_single_pixel_handler(transport, (dc_rgb8_t){.r = 128, .g = 16, .b = 64}, 0);
-    }
-    else if (buffer == '3')
-    {
-      transport->set_single_pixel_handler(transport, (dc_rgb8_t){.r = 0, .g = 0, .b = 64}, 0);
-    }
-    else
-    {
-      transport->set_single_pixel_handler(transport, (dc_rgb8_t){.r = 0, .g = 0, .b = 128}, 0);
-    }
+    rx_length -= SizeOfFrame;
   }
 
+  return ESP_OK;
+}
+
+esp_err_t dc_ambilight_transport_uart_handle_frame(dc_ambilight_transport_handler_t* transport, dc_ambilight_transport_uart_frame_t* frame)
+{
+  dc_ambilight_transport_uart_data_t* data = (dc_ambilight_transport_uart_data_t*)transport->transport_data;
+
+  // Debug logging
+  char info_log[64];
+  sprintf(info_log, "Received a frame: [%ld - (%d, %d, %d)] \r\n", (uint32_t)frame->pixel, frame->color.r, frame->color.g, frame->color.b);
+  dc_uart_write(&data->uart_device, info_log, strlen(info_log), NULL);
+
+  transport->set_single_pixel_handler(transport, frame->color, (uint32_t)frame->pixel);
   return ESP_OK;
 }

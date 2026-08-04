@@ -12,6 +12,15 @@ typedef struct
   dc_ledstrip_t* ledstrip;
 } dc_ambilight_transport_uart_data_t;
 
+// Single command for now so keep it simple
+typedef struct
+{
+  // Keep uint8_t for now since it's enough,
+  // might change if required (all the api already uses uint32_t since it is standard for the esp-idf ledstrip lib so no big changes)
+  uint8_t pixel;
+  dc_rgb8_t color;
+} dc_ambilight_transport_uart_frame_t;
+
 /// @brief Create a transport with the given UART config. The UART device must not be already initialized, it will be done here.
 /// @param uart_config UART device config. Will be initialized here
 /// @param ledstrip The ledstrip handle, must be created using dc_ledstrip_create
@@ -20,6 +29,7 @@ esp_err_t dc_ambilight_transport_uart_create(dc_uart_config_t* uart_config, dc_l
 esp_err_t dc_ambilight_transport_uart_free(dc_ambilight_transport_handler_t* transport);
 
 esp_err_t dc_ambilight_transport_uart_poll(dc_ambilight_transport_handler_t* transport);
+esp_err_t dc_ambilight_transport_uart_handle_frame(dc_ambilight_transport_handler_t* transport, dc_ambilight_transport_uart_frame_t* frame);
 
 ///////////////////////////////////////////
 // Transport callbacks

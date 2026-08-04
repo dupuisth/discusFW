@@ -28,7 +28,7 @@ esp_err_t dc_ledstrip_create(uint8_t gpio, uint32_t pixel_count, dc_ledstrip_t* 
 
 esp_err_t dc_ledstrip_set_pixel(dc_ledstrip_t* ledstrip, uint32_t pixel_index, dc_rgb8_t rgb)
 {
-  esp_err_t err = led_strip_set_pixel(ledstrip->led_strip_handle, 0, rgb.r, rgb.g, rgb.b);
+  esp_err_t err = led_strip_set_pixel(ledstrip->led_strip_handle, pixel_index, rgb.r, rgb.g, rgb.b);
   return err;
 }
 
