@@ -21,6 +21,8 @@ IncludeCategories:
     Priority: 2
   - Regex: '^<discus_zigbee/'
     Priority: 3
+  - Regex: '^<discus_ambilight/'
+    Priority: 4
   - Regex: '^<esp'
     Priority: 1
   - Regex: '.*'

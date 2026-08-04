@@ -1,6 +1,12 @@
 {
   "idf.currentSetup": "/opt/esp/idf",
   "idf.flashType": "UART",
-  "idf.port": "/dev/ttyACM1",
-  "editor.formatOnSave": true
+  "idf.port": "/dev/ttyACM0",
+  "editor.formatOnSave": true,
+  "idf.openOcdConfigs": [
+    "board/esp32h2-ftdi.cfg"
+  ],
+  "idf.customExtraVars": {
+    "IDF_TARGET": "esp32h2"
+  }
 }

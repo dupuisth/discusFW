@@ -1,4 +1,14 @@
 dependencies:
+  discus:
+    dependencies:
+    - name: idf
+      version: 5.5.4
+    - name: espressif/led_strip
+      version: ^3
+    source:
+      path: /workspaces/discus/components/discus
+      type: local
+    version: '*'
   espressif/led_strip:
     component_hash: 28621486f77229aaf81c71f5e15d6fbf36c2949cf11094e07090593e659e7639
     dependencies:
@@ -14,8 +24,9 @@ dependencies:
       type: idf
     version: 5.5.4
 direct_dependencies:
+- discus
 - espressif/led_strip
 - idf
-manifest_hash: b281996e3f056b7092a2f677d2da29e4e87a014afc7b74011f5f75ad80745e2f
+manifest_hash: 27a107e143281c39cd077500e6b35d51c2fa5c407a64ace26bc17ca41707669e
 target: esp32h2
 version: 2.0.0
