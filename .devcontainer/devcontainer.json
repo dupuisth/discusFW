@@ -23,5 +23,5 @@
 	"runArgs": [
 		"--privileged"
 	],
-	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod u+x ./.devcontainer/*.sh && ./.devcontainer/post-create.sh"
+	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"
 }

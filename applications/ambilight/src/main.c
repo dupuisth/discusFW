@@ -48,13 +48,7 @@ void app_main(void)
 
     if (uart_device.enabled)
     {
-      char* test_str = "Hello World!\r\n";
-      if (dc_uart_write(&uart_device, (const char*)test_str, strlen(test_str), NULL) != ESP_OK)
-      {
-        dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_WARNING, 0);
-      }
-
-      char read_buffer[512];
+            char read_buffer[512];
       int length = 0;
       if (dc_uart_read(&uart_device, read_buffer, 512, &length) == ESP_OK)
       {
@@ -72,6 +66,5 @@ void app_main(void)
         dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_WARNING, 0);
       }
     }
-
   }
 }

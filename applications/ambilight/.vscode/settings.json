@@ -1,0 +1,6 @@
+{
+  "idf.currentSetup": "/opt/esp/idf",
+  "idf.flashType": "UART",
+  "idf.port": "/dev/ttyACM1",
+  "editor.formatOnSave": true
+}

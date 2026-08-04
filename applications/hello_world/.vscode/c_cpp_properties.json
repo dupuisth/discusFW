@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "ESP-IDF",
+            "compileCommands": [
+                "${workspaceFolder}/build/compile_commands.json"
+            ],
+            "intelliSenseMode": "${default}",
+            "cStandard": "gnu17",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../../components/**",
+                "${workspaceFolder}/managed_components/**",
+                "/opt/esp/idf/components/**"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/../../components",
+                    "${workspaceFolder}/managed_components",
+                    "/opt/esp/idf/components"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        }
+    ],
+    "version": 4,
+    "enableConfigurationSquiggles": true
+}

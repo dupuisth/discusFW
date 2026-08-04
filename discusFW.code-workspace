@@ -1,0 +1,19 @@
+{
+    "folders": [
+        {
+            "name": "Shared components",
+            "path": "components"
+        },
+        {
+            "name": "Application: Ambilight",
+            "path": "applications/ambilight",
+        },
+        {
+            "name": "Application: Hello World",
+            "path": "applications/hello_world",
+        }
+    ],
+    "settings": {
+        "git.openRepositoryInParentFolders": "always"
+    }
+}
