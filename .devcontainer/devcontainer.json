@@ -21,8 +21,7 @@
 		}
 	},
 	"runArgs": [
-		"--privileged",
-		"--device=${localEnv:ESP_PORT}:/dev/ttyESP"
+		"--privileged"
 	],
 	"postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} && chmod u+x ./.devcontainer/*.sh && ./.devcontainer/post-create.sh"
 }
