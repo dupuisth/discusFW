@@ -9,7 +9,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/opt/esp/idf/components/**",
-                "${workspaceFolder}/managed_components/**"
+                "${workspaceFolder}/managed_components/**",
+                "${workspaceFolder}/components/discus/include/"
             ],
             "browse": {
                 "path": [

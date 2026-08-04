@@ -72,6 +72,41 @@ menu "discus"
                 default 10
         endmenu
 
+        menu "UART"
+            choice DC_LED_INDICATOR_UART_TYPE
+                prompt "Indicator type for UART Status LED"
+                default DC_LED_INDICATOR_UART_TYPE_RGB
+
+                config DC_LED_INDICATOR_UART_TYPE_RMT
+                    bool "RMT"
+
+                config DC_LED_INDICATOR_UART_TYPE_RGB
+                    bool "RBG GPIO"
+                
+                config DC_LED_INDICATOR_UART_TYPE_DISABLED
+                    bool "Disabled"
+            endchoice
+
+            config DC_LED_INDICATOR_UART_RMT_GPIO
+                int "UART indicator RMT GPIO"
+                depends on DC_LED_INDICATOR_UART_TYPE_RMT
+            
+            config DC_LED_INDICATOR_UART_RGB_GPIO_R
+                int "UART indicator GPIO Red"
+                depends on DC_LED_INDICATOR_UART_TYPE_RGB
+                default 0
+
+            config DC_LED_INDICATOR_UART_RGB_GPIO_G
+                int "UART indicator GPIO Green"
+                depends on DC_LED_INDICATOR_UART_TYPE_RGB
+                default 11
+
+            config DC_LED_INDICATOR_UART_RGB_GPIO_B
+                int "UART indicator GPIO Blue"
+                depends on DC_LED_INDICATOR_UART_TYPE_RGB
+                default 10
+        endmenu
+
         config DC_LED_INDICATOR_MAX_VALUE
             int "Max intensity"
             range 0 255

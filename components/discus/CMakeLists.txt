@@ -6,5 +6,5 @@ file(GLOB_RECURSE SRC_FILES
 idf_component_register(
     SRCS ${SRC_FILES}
     INCLUDE_DIRS "include"
-    REQUIRES esp_driver_gpio led_strip nvs_flash
+    REQUIRES esp_driver_gpio esp_driver_uart led_strip nvs_flash
 )

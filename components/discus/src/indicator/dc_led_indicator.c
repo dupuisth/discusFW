@@ -64,10 +64,10 @@ esp_err_t dc_led_indicator_init()
 #else
 #error Undefined behavior
 #endif
-  ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM]), TAG, "Failed to init Zigbee indicator");
+  ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_SYSTEM]), TAG, "Failed to init System indicator");
 #endif
 
-  // Zigbee
+// Zigbee
 #ifndef CONFIG_DC_LED_INDICATOR_ZIGBEE_TYPE_DISABLED
 #if CONFIG_DC_LED_INDICATOR_ZIGBEE_TYPE_RGB
   ESP_RETURN_ON_ERROR(dc_led_indicator_create_rgb(&dc_led_indicators[DC_STATUS_DOMAIN_ZIGBEE],
@@ -84,6 +84,25 @@ esp_err_t dc_led_indicator_init()
 #error Undefined behavior
 #endif
   ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_ZIGBEE]), TAG, "Failed to init Zigbee indicator");
+#endif
+
+// UART
+#ifndef CONFIG_DC_LED_INDICATOR_UART_TYPE_DISABLED
+#if CONFIG_DC_LED_INDICATOR_UART_TYPE_RGB
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rgb(&dc_led_indicators[DC_STATUS_DOMAIN_UART],
+                          CONFIG_DC_LED_INDICATOR_UART_RGB_GPIO_R,
+                          CONFIG_DC_LED_INDICATOR_UART_RGB_GPIO_G,
+                          CONFIG_DC_LED_INDICATOR_UART_RGB_GPIO_B),
+      TAG,
+      "Failed to create UART indicator");
+#elif CONFIG_DC_LED_INDICATOR_UART_TYPE_RMT
+  ESP_RETURN_ON_ERROR(dc_led_indicator_create_rmt(&dc_led_indicators[DC_STATUS_DOMAIN_UART], CONFIG_DC_LED_INDICATOR_UART_RMT_GPIO),
+      TAG,
+      "Failed to create UART indicator");
+#else
+#error Undefined behavior
+#endif
+  ESP_RETURN_ON_ERROR(dc_led_indicator_init_indicator(&dc_led_indicators[DC_STATUS_DOMAIN_UART]), TAG, "Failed to init UART indicator");
 #endif
 
   // Register to the status callback
@@ -207,7 +226,7 @@ esp_err_t dc_led_indicator_set_color(dc_led_indicator_t* indicator, uint8_t r, u
 #define Q_APPLY(actual, expected, r, g, b, or, og, ob)                                                                                               \
   if (actual == expected)                                                                                                                            \
   {                                                                                                                                                  \
-    *r = or ;                                                                                                                                        \
+    *r = or;                                                                                                                                         \
     *g = og;                                                                                                                                         \
     *b = ob;                                                                                                                                         \
     return ESP_OK;                                                                                                                                   \
@@ -217,12 +236,14 @@ esp_err_t dc_led_indicator_color_from_status(dc_status_domain_t domain, dc_statu
 {
   if (entry.detail_code != 0)
   {
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_DISCONNECTED, r, g, b, 0, 255, 255);
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_JOINING, r, g, b, 0, 255, 255);
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_CONNECTED, r, g, b, 0, 255, 255);
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_RECONNECTING, r, g, b, 0, 255, 255);
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_PAIRING, r, g, b, 0, 255, 255);
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_ERROR, r, g, b, 0, 255, 255);
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_DISCONNECTED, r, g, b, 255, 255, 0); // Yellow
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_JOINING, r, g, b, 0, 255, 255);      // Cyan
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_READING, r, g, b, 0, 0, 255);        // Blue
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_WRITING, r, g, b, 255, 0, 255);      // Magenta
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_CONNECTED, r, g, b, 0, 255, 0);      // Green
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_RECONNECTING, r, g, b, 255, 128, 0); // Orange
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_PAIRING, r, g, b, 128, 0, 255);      // Purple
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_ERROR, r, g, b, 255, 0, 0);          // Red
 
     ESP_LOGW(TAG, "Expected a custom led color for the given entry code %d", entry.detail_code);
   }
