@@ -237,7 +237,7 @@ esp_err_t dc_led_indicator_color_from_status(dc_status_domain_t domain, dc_statu
   if (entry.detail_code != 0)
   {
     Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_DISCONNECTED, r, g, b, 255, 255, 0); // Yellow
-    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_JOINING, r, g, b, 0, 255, 255);      // Cyan
+    Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_JOINING, r, g, b, 16, 255, 255);     // Cyan
     Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_READING, r, g, b, 0, 0, 255);        // Blue
     Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_WRITING, r, g, b, 255, 0, 255);      // Magenta
     Q_APPLY(entry.detail_code, DC_STATUS_CONNECTIVITY_CONNECTED, r, g, b, 0, 255, 0);      // Green

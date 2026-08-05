@@ -90,7 +90,7 @@ esp_err_t dc_uart_read_size(dc_uart_device_t* device, int* bytes)
   return ESP_OK;
 }
 
-esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, int* bytes_read)
+esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, int* bytes_read, TickType_t ticks_to_wait)
 {
   if (!device->enabled)
   {
@@ -99,25 +99,8 @@ esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, 
   }
 
   dc_status_manager_set(DC_STATUS_DOMAIN_UART, DC_STATUS_LEVEL_SYSTEM_OK, DC_STATUS_CONNECTIVITY_READING);
-
-  // Get the length of the data stored in the RX buffer
-  int rx_data_length = 0;
-  esp_err_t err = uart_get_buffered_data_len(device->port, (size_t*)&rx_data_length);
-  if (err != ESP_OK)
-  {
-    dc_status_manager_set(DC_STATUS_DOMAIN_UART, DC_STATUS_LEVEL_SYSTEM_ERROR, DC_STATUS_CONNECTIVITY_ERROR);
-    ESP_RETURN_ON_ERROR(err, TAG, "Failed to get buffered data length");
-  }
-
-  // Check if the given buffer is long enough
-  int read_length = rx_data_length;
-  if (rx_data_length > size_bytes)
-  {
-    read_length = size_bytes;
-  }
-
   // Read the bytes
-  int bytes_read_val = uart_read_bytes(device->port, data, read_length, pdMS_TO_TICKS(1000));
+  int bytes_read_val = uart_read_bytes(device->port, data, size_bytes, ticks_to_wait);
   if (bytes_read_val < 0)
   {
     dc_status_manager_set(DC_STATUS_DOMAIN_UART, DC_STATUS_LEVEL_SYSTEM_ERROR, DC_STATUS_CONNECTIVITY_ERROR);

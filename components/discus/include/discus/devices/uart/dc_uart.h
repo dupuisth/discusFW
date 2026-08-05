@@ -32,6 +32,6 @@ esp_err_t dc_uart_init(dc_uart_config_t* config, dc_uart_device_t* device);
 
 esp_err_t dc_uart_write(dc_uart_device_t* device, const void* data, size_t size_bytes, int* bytes_wrote);
 esp_err_t dc_uart_read_size(dc_uart_device_t* device, int* bytes);
-esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, int* bytes_read);
+esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, int* bytes_read, TickType_t ticks_to_wait);
 
 #endif
