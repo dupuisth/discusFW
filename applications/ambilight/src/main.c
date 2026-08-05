@@ -36,6 +36,7 @@ void app_main(void)
       .gpio_dsr = UART_PIN_NO_CHANGE,
       .gpio_dtr = UART_PIN_NO_CHANGE};
 
+  dc_ambilight_uart_data_t transport;
   if (dc_ambilight_uart_create(&uart_config, &ledstrip, &transport) != ESP_OK)
   {
     dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_FATAL, 0);

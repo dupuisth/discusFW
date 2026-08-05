@@ -42,5 +42,9 @@ source ~/.bashrc
 
 ```sh
 cd discusFW
-code .
+code discusFW.code-workspace
 ```
+
+Open the checked-in workspace file rather than the repository folder directly. The
+workspace assigns the correct ESP-IDF compilation database to each application and
+to the shared components, which is required for C/C++ IntelliSense diagnostics.

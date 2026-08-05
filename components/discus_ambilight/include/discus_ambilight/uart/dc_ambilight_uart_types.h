@@ -3,17 +3,17 @@
 
 #include <discus/devices/uart/dc_uart.h>
 
-#define DC_ambilight_uart_MAGIC 0xA5U
-#define DC_ambilight_uart_CRC_INITIAL 0xFFFFU
-#define DC_ambilight_uart_CRC_POLY 0X1021U
+#define DC_AMBILIGHT_UART_MAGIC 0x43U
+#define DC_AMBILIGHT_UART_CRC_INITIAL 0xFFFFU
+#define DC_AMBILIGHT_UART_CRC_POLY 0X1021U
 
-#define DC_ambilight_uart_COMMAND_SET_PIXEL 0
-#define DC_ambilight_uart_COMMAND_FLUSH 1
+#define DC_AMBILIGHT_UART_COMMAND_SET_PIXEL 0
+#define DC_AMBILIGHT_UART_COMMAND_FLUSH 1
 
 // Data stored in the transport data pointer
 typedef struct
 {
-  dc_uart_device_t* uart_device;
+  dc_uart_device_t uart_device;
   dc_ledstrip_t* ledstrip;
 } dc_ambilight_uart_data_t;
 

@@ -15,6 +15,6 @@ esp_err_t dc_ambilight_uart_free(dc_ambilight_uart_data_t* transport);
 esp_err_t dc_ambilight_uart_run(dc_ambilight_uart_data_t* transport);
 esp_err_t dc_ambilight_uart_handle_frame(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame);
 
-bool dc_ambilight_uart_validate_frame(const dc_ambilight_uart_frame_t* frame);
+bool dc_ambilight_uart_validate_frame(dc_ambilight_uart_data_t* transport, const dc_ambilight_uart_frame_t* frame);
 
 #endif

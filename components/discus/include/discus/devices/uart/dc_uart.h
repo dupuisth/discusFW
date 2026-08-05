@@ -34,4 +34,16 @@ esp_err_t dc_uart_write(dc_uart_device_t* device, const void* data, size_t size_
 esp_err_t dc_uart_read_size(dc_uart_device_t* device, int* bytes);
 esp_err_t dc_uart_read(dc_uart_device_t* device, void* data, size_t size_bytes, int* bytes_read, TickType_t ticks_to_wait);
 
+// Quick debug
+#ifdef DC_UART_DEBUG
+#define DC_UART_DEBUG_WRITE_MSG(device, buffer_size, message, ...)                                                                                   \
+  {                                                                                                                                                  \
+    char uart_debug_buffer[buffer_size];                                                                                                             \
+    snprintf(uart_debug_buffer, (size_t)buffer_size, message, __VA_ARGS__);                                                                          \
+    dc_uart_write(device, uart_debug_buffer, strnlen(uart_debug_buffer, buffer_size), NULL);                                                         \
+  }
+#else
+#define DC_UART_DEBUG_WRITE_MSG(device, buffer_size, message, ...)
+#endif
+
 #endif

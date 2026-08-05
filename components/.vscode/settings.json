@@ -3,5 +3,6 @@
     "C_Cpp.default.intelliSenseMode": "${default}",
     "editor.formatOnSave": true,
     "idf.currentSetup": "/opt/esp/idf",
-    "cmake.sourceDirectory": "/workspaces/discus/components/discus_ambilight"
+    "cmake.sourceDirectory": "/workspaces/discus/components/discus_ambilight",
+    "idf.port": "/dev/ttyACM0"
 }
