@@ -20,7 +20,6 @@ static uint8_t dc_status_callback_idx = 0;
 
 esp_err_t dc_status_manager_set(dc_status_domain_t domain, dc_status_level_t level, int detail_code)
 {
-  ESP_LOGI(TAG, "Status changed for %d (%d/%d)", domain, level, detail_code);
   esp_err_t err = ESP_OK;
   if (domain < 0 || domain >= DC_STATUS_DOMAIN_LAST_ENUM)
   {

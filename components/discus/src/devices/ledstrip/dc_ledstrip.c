@@ -14,10 +14,12 @@ esp_err_t dc_ledstrip_create(uint8_t gpio, uint32_t pixel_count, dc_ledstrip_t* 
       .max_leds = pixel_count,
       .led_model = LED_MODEL_WS2812, // Always this one
       .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_GRB,
-      .flags = {.invert_out = false}};
+      .flags = {
+          .invert_out = false,
+      }};
 
   led_strip_rmt_config_t rmt_config = {
-      .clk_src = RMT_CLK_SRC_DEFAULT, .resolution_hz = (10 * 1000 * 1000), .mem_block_symbols = 0, .flags = {.with_dma = false}};
+      .clk_src = RMT_CLK_SRC_DEFAULT, .resolution_hz = (10 * 1000 * 1000), .mem_block_symbols = 96, .flags = {.with_dma = false}};
 
   esp_err_t err = led_strip_new_rmt_device(&strip_config, &rmt_config, &ledstrip->led_strip_handle);
   ESP_RETURN_ON_ERROR(err, TAG, "Failed to create ledstrip device");
@@ -26,10 +28,23 @@ esp_err_t dc_ledstrip_create(uint8_t gpio, uint32_t pixel_count, dc_ledstrip_t* 
   return err;
 }
 
+esp_err_t dc_ledstrip_delete(dc_ledstrip_t* ledstrip)
+{
+  if (!ledstrip->enabled)
+  {
+    ESP_RETURN_ON_ERROR(ESP_ERR_INVALID_STATE, TAG, "Trying to delete a ledstrip that is not enabled!");
+  }
+
+  esp_err_t err = led_strip_del(ledstrip->led_strip_handle);
+  ledstrip->enabled = false;
+  ledstrip->pixel_count = 0;
+  ESP_RETURN_ON_ERROR(err, TAG, "Error while deleting ledstrip");
+  return err;
+}
+
 esp_err_t dc_ledstrip_set_pixel(dc_ledstrip_t* ledstrip, uint32_t pixel_index, dc_rgb8_t rgb)
 {
-  esp_err_t err = led_strip_set_pixel(ledstrip->led_strip_handle, pixel_index, rgb.r, rgb.g, rgb.b);
-  return err;
+  return led_strip_set_pixel(ledstrip->led_strip_handle, pixel_index, rgb.r, rgb.g, rgb.b);
 }
 
 esp_err_t dc_ledstrip_fill_pixels(dc_ledstrip_t* ledstrip, dc_rgb8_t rgb)
@@ -47,8 +62,12 @@ esp_err_t dc_ledstrip_fill_pixels(dc_ledstrip_t* ledstrip, dc_rgb8_t rgb)
   return err;
 }
 
+esp_err_t dc_ledstrip_clear_pixels(dc_ledstrip_t* ledstrip)
+{
+  return led_strip_clear(ledstrip->led_strip_handle);
+}
+
 esp_err_t dc_ledstrip_flush(dc_ledstrip_t* ledstrip)
 {
-  esp_err_t err = led_strip_refresh(ledstrip->led_strip_handle);
-  return err;
+  return led_strip_refresh(ledstrip->led_strip_handle);
 }

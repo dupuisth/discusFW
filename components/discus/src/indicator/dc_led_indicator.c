@@ -13,12 +13,9 @@ static dc_led_indicator_t dc_led_indicators[DC_STATUS_DOMAIN_LAST_ENUM];
 
 static void dc_led_indicator_status_callback(dc_status_domain_t domain, dc_status_entry_t status)
 {
-  ESP_LOGI(TAG, "Received update!!");
   dc_led_indicator_t* target = &dc_led_indicators[domain];
   if (target->enabled == false)
   {
-    ESP_LOGI(TAG, "Disabled!!");
-
     return;
   }
 
@@ -171,7 +168,6 @@ esp_err_t dc_led_indicator_init_indicator(dc_led_indicator_t* indicator)
 
 esp_err_t dc_led_indicator_set_color(dc_led_indicator_t* indicator, uint8_t r, uint8_t g, uint8_t b)
 {
-
   esp_err_t err = ESP_OK;
   if (!indicator->enabled)
   {
@@ -199,14 +195,6 @@ esp_err_t dc_led_indicator_set_color(dc_led_indicator_t* indicator, uint8_t r, u
   }
   else
   {
-    ESP_LOGI(TAG,
-        "Setting RGB %d %d %d (%u, %u, %u)",
-        indicator->r_gpio,
-        indicator->g_gpio,
-        indicator->b_gpio,
-        (unsigned int)r,
-        (unsigned int)g,
-        (unsigned int)b);
     err = ESP_ERROR_CHECK_WITHOUT_ABORT(gpio_set_level(indicator->r_gpio, r > 0 ? 1 : 0));
     if (err != ESP_OK)
       return err;

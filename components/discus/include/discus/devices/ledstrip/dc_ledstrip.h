@@ -27,8 +27,12 @@ typedef struct
 
 esp_err_t dc_ledstrip_create(uint8_t gpio, uint32_t pixel_count, dc_ledstrip_t* ledstrip);
 
+/// @brief Delete the given ledstrip (delete the ledstrip handle). Also sets enabled to false and pixel_count to 0. The gpio remains unchanged.
+esp_err_t dc_ledstrip_delete(dc_ledstrip_t* ledstrip);
+
 esp_err_t dc_ledstrip_set_pixel(dc_ledstrip_t* ledstrip, uint32_t pixel_index, dc_rgb8_t rgb);
 esp_err_t dc_ledstrip_fill_pixels(dc_ledstrip_t* ledstrip, dc_rgb8_t rgb);
+esp_err_t dc_ledstrip_clear_pixels(dc_ledstrip_t* ledstrip);
 
 esp_err_t dc_ledstrip_flush(dc_ledstrip_t* ledstrip);
 
