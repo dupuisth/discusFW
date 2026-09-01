@@ -34,18 +34,18 @@ void app_main(void)
 
   dc_ledstrip_t ledstrip;
   memset(&ledstrip, 0, sizeof(dc_ledstrip_t));
-  ledstrip.gpio = 2;
+  ledstrip.gpio = 0;
 
   // Devkit UART GPIO : 24 TX, 23 RX
   // Using an external UART chip (CP2102):
   dc_uart_config_t uart_config = {.port = UART_NUM_1,
-      .baud_rate = 460800,
+      .baud_rate = 115200,
       .tx_buffer_size = 0,
       .rx_buffer_size = 1024,
       .event_queue_size = 0,
       .event_queue = NULL,
-      .gpio_tx = 4,
-      .gpio_rx = 5,
+      .gpio_tx = 3,
+      .gpio_rx = 2,
       .gpio_rts = UART_PIN_NO_CHANGE,
       .gpio_cts = UART_PIN_NO_CHANGE,
       .gpio_dsr = UART_PIN_NO_CHANGE,
@@ -66,7 +66,14 @@ void app_main(void)
   params.shared = &shared;
   xTaskCreate(dc_ambilight_ledstrip_task, "dc_ambilight_ledstrip_task", 2048, &params, 1, &shared.led_task);
 
-  // // Run the UART loop
+  while (true)
+  {
+    char data[] = "Hello world!";
+    dc_uart_write(&transport.uart_device, data, strlen(data), NULL);
+    vTaskDelay(pdMS_TO_TICKS(5000));
+  }
+
+  // Run the UART loop
   dc_ambilight_uart_run(&transport);
 
   dc_status_manager_set(DC_STATUS_DOMAIN_SYSTEM, DC_STATUS_LEVEL_SYSTEM_FATAL, 0);
