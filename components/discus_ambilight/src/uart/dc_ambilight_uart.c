@@ -141,6 +141,10 @@ esp_err_t dc_ambilight_uart_handle_frame(dc_ambilight_uart_data_t* transport, dc
   {
     return dc_ambilight_uart_handle_command_flush(transport, frame);
   }
+  else if (frame->command == DC_AMBILIGHT_UART_COMMAND_CHANGE_BAUD_RATE)
+  {
+    return dc_ambilight_uart_handle_command_change_baud_rate(transport, frame);
+  }
   else
   {
     return ESP_ERR_INVALID_ARG;
@@ -193,4 +197,12 @@ esp_err_t dc_ambilight_uart_handle_command_set_pixel(dc_ambilight_uart_data_t* t
 esp_err_t dc_ambilight_uart_handle_command_flush(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame)
 {
   return dc_ambilight_shared_data_publish(transport->shared, transport->rx_pixels, transport->pixel_count);
+}
+
+esp_err_t dc_ambilight_uart_handle_command_change_baud_rate(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame)
+{
+  uint32_t baudrate = *(uint32_t*)frame->payload;
+
+  // Update the driver baudrate
+  return dc_uart_update_baud_rate(&transport->uart_device, baudrate);
 }

@@ -48,6 +48,24 @@ esp_err_t dc_uart_init(dc_uart_config_t* config, dc_uart_device_t* device)
   return err;
 }
 
+esp_err_t dc_uart_update_baud_rate(dc_uart_device_t* device, uint32_t baudrate)
+{
+  if (!device->enabled)
+  {
+    ESP_LOGE(TAG, "Trying to update the UART baud rate but the device is not enabled");
+    return ESP_ERR_INVALID_STATE;
+  }
+
+  esp_err_t err = uart_set_baudrate(device->port, baudrate);
+  if (err != ESP_OK)
+  {
+    dc_status_manager_set(DC_STATUS_DOMAIN_UART, DC_STATUS_LEVEL_SYSTEM_ERROR, 0);
+    ESP_RETURN_ON_ERROR(err, TAG, "Failed to update baudrate");
+  }
+
+  return err;
+}
+
 esp_err_t dc_uart_write(dc_uart_device_t* device, const void* data, size_t size, int* bytes_wrote)
 {
   if (!device->enabled)

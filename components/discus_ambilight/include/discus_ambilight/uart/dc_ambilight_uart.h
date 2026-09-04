@@ -24,5 +24,6 @@ esp_err_t dc_ambilight_uart_handle_frame(dc_ambilight_uart_data_t* transport, dc
 esp_err_t dc_ambilight_uart_handle_command_configure(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame);
 esp_err_t dc_ambilight_uart_handle_command_set_pixel(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame);
 esp_err_t dc_ambilight_uart_handle_command_flush(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame);
+esp_err_t dc_ambilight_uart_handle_command_change_baud_rate(dc_ambilight_uart_data_t* transport, dc_ambilight_uart_frame_t* frame);
 
 #endif

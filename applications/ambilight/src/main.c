@@ -66,13 +66,6 @@ void app_main(void)
   params.shared = &shared;
   xTaskCreate(dc_ambilight_ledstrip_task, "dc_ambilight_ledstrip_task", 2048, &params, 1, &shared.led_task);
 
-  while (true)
-  {
-    char data[] = "Hello world!";
-    dc_uart_write(&transport.uart_device, data, strlen(data), NULL);
-    vTaskDelay(pdMS_TO_TICKS(5000));
-  }
-
   // Run the UART loop
   dc_ambilight_uart_run(&transport);
 

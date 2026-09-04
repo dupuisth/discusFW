@@ -12,6 +12,7 @@
 #define DC_AMBILIGHT_UART_COMMAND_CONFIGURE 0
 #define DC_AMBILIGHT_UART_COMMAND_SET_PIXEL 1
 #define DC_AMBILIGHT_UART_COMMAND_FLUSH 2
+#define DC_AMBILIGHT_UART_COMMAND_CHANGE_BAUD_RATE 3
 
 // Data stored in the transport data pointer
 typedef struct
@@ -31,6 +32,7 @@ typedef struct
   // CONFIGURE: [LED COUNT: 8] [NOT USED: 24]
   // SET_PIXEL: [INDEX: 8] [R: 8] [G: 8] [B: 8]
   // FLUSH: [NOT USED: 32]
+  // CHANGE_BAUD_RATE: [BAUD_RATE: 32]
   uint8_t payload[4];
   uint16_t checksum;
 } dc_ambilight_uart_frame_t;

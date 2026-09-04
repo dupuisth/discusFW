@@ -12,7 +12,7 @@ typedef struct
   int event_queue_size;
   QueueHandle_t* event_queue;
 
-  int baud_rate;
+  uint32_t baud_rate;
 
   int gpio_rx;
   int gpio_tx;
@@ -29,6 +29,7 @@ typedef struct
 } dc_uart_device_t;
 
 esp_err_t dc_uart_init(dc_uart_config_t* config, dc_uart_device_t* device);
+esp_err_t dc_uart_update_baud_rate(dc_uart_device_t* device, uint32_t baudrate);
 
 esp_err_t dc_uart_write(dc_uart_device_t* device, const void* data, size_t size_bytes, int* bytes_wrote);
 esp_err_t dc_uart_read_size(dc_uart_device_t* device, int* bytes);
